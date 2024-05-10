@@ -1,10 +1,9 @@
-/**
- ** Return if user is logged in
- ** This is completely up to you and how you want to store the token in your frontend application
- *  ? e.g. If you are using cookies to store the application please update this function
- */
+import moment from 'moment';
+
 export const isUserLoggedIn = () => localStorage.getItem('userData');
-export const getUserData = () => JSON.parse(localStorage.getItem('userData'));
+export const getUserData = () => {
+  return localStorage.getItem('userData');
+};
 
 export const isObjEmpty = (obj) => Object.keys(obj).length === 0;
 
@@ -17,4 +16,17 @@ export const removeToken = () => {
 };
 export const setToken = (val) => {
   localStorage.setItem('accessToken', val);
+};
+
+export const removeUserData = () => {
+  localStorage.removeItem('userData');
+};
+export const setUserData = (val) => {
+  localStorage.setItem('userData', val);
+};
+
+export const getDateFormat = (formattedDate) => {
+  const formattedDateMoment = moment(`${formattedDate}`, 'YYYY-MM-DD HH:mm A');
+  const formattedDateTime = moment(formattedDateMoment).format('llll');
+  return formattedDateTime;
 };

@@ -14,7 +14,7 @@ const Register = () => {
         <Card className="mb-0">
           <CardBody>
             <div className="mb-4 d-flex justify-content-center">
-              <img className="logo" src={logo1Img} alt="BabySitter" />
+              <img className="logo" src={logo1Img} alt="SmartSitter" />
             </div>
 
             <div className="row">

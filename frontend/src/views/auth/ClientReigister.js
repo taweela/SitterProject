@@ -1,22 +1,73 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import { Form, FormGroup, Label, Button, Card, CardBody } from 'reactstrap';
 import { useForm } from 'react-hook-form';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Autocomplete from 'react-google-autocomplete';
 import classnames from 'classnames';
+import toast from 'react-hot-toast';
 import logo1Img from '../../assets/images/logo-1.png';
+import { useRegisterUserMutation } from '../../redux/api/authAPI';
+import { isObjEmpty } from '../../utils/Utils';
 
 const ClientRegister = () => {
   const {
     register,
+    setError,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    clearErrors
   } = useForm();
+
+  const [addressObj, setAddressObj] = useState();
+
+  // 👇 Calling the Register Mutation
+  const [registerUser, { isLoading, isSuccess, error, isError }] = useRegisterUserMutation();
 
   const navigate = useNavigate();
 
   const onSubmit = (data) => {
-    // loginUser(data);
+    if (!addressObj) {
+      errors.address = {};
+      setError('address', {
+        type: 'manual',
+        message: 'Please select an address using the suggested option'
+      });
+    }
+    if (isObjEmpty(errors)) {
+      data.address = addressObj;
+      data.role = 'client';
+      registerUser(data);
+    }
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">User registered successfully</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+      navigate('/login');
+    }
+
+    if (isError) {
+      toast.error(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">{error.data}</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+  }, [isLoading]);
 
   return (
     <div className="auth-wrapper auth-v1 px-2 auth-background">
@@ -24,7 +75,7 @@ const ClientRegister = () => {
         <Card className="mb-0">
           <CardBody>
             <div className="mb-4 d-flex justify-content-center">
-              <img className="logo" src={logo1Img} alt="BabySitter" />
+              <img className="logo" src={logo1Img} alt="SmartSitter" />
             </div>
             <div className="row">
               <div className="col-12">
@@ -73,6 +124,24 @@ const ClientRegister = () => {
                   {...register('email', { required: true })}
                 />
                 {errors.email && <span className="text-danger">Email is required.</span>}
+              </FormGroup>
+              <FormGroup>
+                <Label>Address</Label>
+                <Autocomplete
+                  className="form-control"
+                  apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
+                  onChange={(e) => setAddressObj()}
+                  onPlaceSelected={(place) => {
+                    clearErrors('address');
+                    setAddressObj(place);
+                  }}
+                  options={{
+                    types: ['address']
+                  }}
+                />
+                {Object.keys(errors).length && errors.address ? (
+                  <small className="text-danger mt-1">{errors.address.message}</small>
+                ) : null}
               </FormGroup>
               <FormGroup>
                 <Label>Password</Label>

@@ -17,6 +17,7 @@ import {
 import userImg from '../assets/images/user.png';
 import logo1Img from '../assets/images/logo-1.png';
 import { getToken, getUserData } from '../utils/Utils';
+
 // import { useLogoutUserMutation } from '../redux/api/getMeApi';
 
 const Header = () => {
@@ -49,7 +50,13 @@ const Header = () => {
         <Navbar full="true" expand="md">
           <NavbarBrand
             href={
-              accessToken ? (userData?.role === 'admin' ? '/admin/dashboard' : '/dashboard') : '/'
+              accessToken
+                ? userData?.role === 'admin'
+                  ? '/admin/dashboard'
+                  : userData.role === 'client'
+                    ? '/client/dashboard'
+                    : '/serviceProvider/dashboard'
+                : '/'
             }>
             <img src={logo1Img} alt="beautySN" style={{ height: '55px', width: 'auto' }} />
           </NavbarBrand>

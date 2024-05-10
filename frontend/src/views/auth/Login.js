@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import classnames from 'classnames';
 import logo1Img from '../../assets/images/logo-1.png';
+import toast from 'react-hot-toast';
+import { useLoginUserMutation } from '../../redux/api/authAPI';
+import { useEffect } from 'react';
 
 const Login = () => {
   const {
@@ -12,11 +15,40 @@ const Login = () => {
     formState: { errors }
   } = useForm();
 
+  const [loginUser, { isLoading, isError, error, isSuccess }] = useLoginUserMutation();
+
   const navigate = useNavigate();
 
   const onSubmit = (data) => {
-    // loginUser(data);
+    loginUser(data);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">Welcome, Success Login!</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+      navigate('/login');
+    }
+
+    if (isError) {
+      toast.error(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">{error.data.message}</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+  }, [isLoading]);
 
   return (
     <div className="auth-wrapper auth-v1 px-2 auth-background">
@@ -24,7 +56,7 @@ const Login = () => {
         <Card className="mb-0">
           <CardBody>
             <div className="mb-4 d-flex justify-content-center">
-              <img className="logo" src={logo1Img} alt="BabySitter" />
+              <img className="logo" src={logo1Img} alt="SmartSitter" />
             </div>
 
             <div className="row">

@@ -1,9 +1,9 @@
-/* eslint-disable no-empty */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-// import { getMeApi } from './getMeApi';
-// import { setToken, setUserData } from '../../utils/Utils';
+
+import { setToken, setUserData } from '../../utils/Utils';
+import { getMeAPI } from './getMeAPI';
 // import socketIOClient from 'socket.io-client';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
@@ -35,11 +35,14 @@ export const authAPI = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const response = await queryFulfilled;
+          console.log(response.data);
           //   socket.emit('login', response.data.userData._id);
-          //   setToken(response.data.accessToken);
-          //   setUserData(JSON.stringify(response.data.userData));
-          //   await dispatch(getMeApi.endpoints.getMe.initiate(null));
-        } catch (error) {}
+          setToken(response.data.accessToken);
+          setUserData(JSON.stringify(response.data.userData));
+          await dispatch(getMeAPI.endpoints.getMe.initiate(null));
+        } catch (error) {
+          console.log(error);
+        }
       }
     }),
     adminLoginUser: builder.mutation({
@@ -57,8 +60,10 @@ export const authAPI = createApi({
           socket.emit('login', response.data.userData._id);
           setToken(response.data.accessToken);
           setUserData(JSON.stringify(response.data.userData));
-          await dispatch(getMeApi.endpoints.getMe.initiate(null));
-        } catch (error) {}
+          await dispatch(getMeAPI.endpoints.getMe.initiate(null));
+        } catch (error) {
+          console.log(error);
+        }
       }
     })
   })
