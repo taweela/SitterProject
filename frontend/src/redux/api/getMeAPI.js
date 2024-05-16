@@ -2,7 +2,7 @@
 /* eslint-disable no-undef */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout, setUser } from './userSlice';
-import { removeToken, removeUserData, setUserData } from '../../utils/Utils';
+import { getToken, removeToken, removeUserData, setUserData } from '../../utils/Utils';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -35,7 +35,14 @@ export const getMeAPI = createApi({
           const { data } = await queryFulfilled;
           dispatch(setUser(data));
         } catch (error) {
-          console.log(error);
+          console.log(error.error.originalStatus);
+          if (error.error.originalStatus == 401) {
+            removeToken();
+            removeUserData();
+            dispatch(logout());
+          } else {
+            console.log(error);
+          }
         }
       }
     }),
@@ -67,7 +74,7 @@ export const getMeAPI = createApi({
       },
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
-          const response = await queryFulfilled;
+          await queryFulfilled;
           removeToken();
           removeUserData();
           dispatch(logout());

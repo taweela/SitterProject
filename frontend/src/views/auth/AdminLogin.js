@@ -1,9 +1,12 @@
 /* eslint-disable no-unused-vars */
+import { useEffect } from 'react';
 import { Form, FormGroup, Label, Button, Card, CardBody } from 'reactstrap';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import classnames from 'classnames';
+import toast from 'react-hot-toast';
 import logo1Img from '../../assets/images/logo-1.png';
+import { useAdminLoginUserMutation } from '../../redux/api/authAPI';
 
 const AdminLogin = () => {
   const {
@@ -12,11 +15,41 @@ const AdminLogin = () => {
     formState: { errors }
   } = useForm();
 
+  const [adminLoginUser, { isLoading, isError, error, isSuccess }] = useAdminLoginUserMutation();
+
   const navigate = useNavigate();
 
   const onSubmit = (data) => {
-    // loginUser(data);
+    adminLoginUser(data);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">Welcome, Success Admin Login!</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+      navigate('/admin/clients');
+    }
+
+    if (isError) {
+      console.log(error.data);
+      toast.error(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">{error.data.message}</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+  }, [isLoading]);
 
   return (
     <div className="auth-wrapper auth-v1 px-2 auth-background">

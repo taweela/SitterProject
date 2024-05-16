@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
   const hashPassword = await bcrypt.hash(req.body.password, salt);
   const { lat, lng } = req.body.address.geometry.location;
   let userTemp = {};
-  if (req.body.providerType) {
+  if (req.body.role == 'serviceProvider') {
     userTemp = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -44,6 +44,7 @@ router.post('/register', async (req, res) => {
         providerType: req.body.providerType,
         latitude: lat,
         longitude: lng,
+        status: 'pending'
     }
   } else {
     userTemp = {

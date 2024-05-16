@@ -7,6 +7,7 @@ import logo1Img from '../../assets/images/logo-1.png';
 import toast from 'react-hot-toast';
 import { useLoginUserMutation } from '../../redux/api/authAPI';
 import { useEffect } from 'react';
+import { getUserData } from '../../utils/Utils';
 
 const Login = () => {
   const {
@@ -34,7 +35,15 @@ const Login = () => {
           position: 'top-right'
         }
       );
-      navigate('/login');
+      const user = getUserData();
+      if (user) {
+        const userInfo = JSON.stringify(user);
+        if (userInfo.role == 'client') {
+          navigate('/client/dashboard');
+        } else {
+          navigate('/service-provider/dashboard');
+        }
+      }
     }
 
     if (isError) {

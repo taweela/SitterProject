@@ -1,29 +1,17 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
-    firstName: {
+const serviceSchema = new mongoose.Schema({
+    title: {
         type: String,
         required: true,
     },
-    lastName: {
+    description: {
         type: String,
         required: true,
     },
-    email: {
+    type: {
         type: String,
-        required: true,
-        min: 6,
-        max: 255,
-    },
-    password: {
-        type: String,
-        required: true,
-        max: 1024,
-        min: 6,
-    },
-    role: {
-        type: String,
-        enum: ['admin', 'client', 'serviceProvider'],
+        enum: ['fixed', 'hourly'],
         required: true,
     },
     address: {
@@ -38,26 +26,35 @@ const userSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    providerType: {
-        type: String,
-        required: true,
-    },
     status: {
         type: String,
-        enum: ['pending', 'active', 'declined', 'deleted', ''],
-        default: '',
+        enum: ['active', 'disabled', 'deleted', ''],
+        default: 'active',
     },
-    rate: {
+    price: {
         type: Number,
         default: 0,
     },
-    description: {
-        type: String,
-        default: '',
-    },
-
-    lastLogin: {
+    fromDate: {
         type: Date,
+        required: true,
+    },
+    fromTime: {
+        type: String,
+        required: true,
+    },
+    toDate: {
+        type: Date,
+        required: true,
+    },
+    toTime: {
+        type: String,
+        required: true,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
 }, {
     timestamps: {
@@ -66,4 +63,4 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Service', serviceSchema);

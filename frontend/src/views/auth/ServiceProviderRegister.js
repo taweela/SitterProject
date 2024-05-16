@@ -163,9 +163,7 @@ const ServiceProviderRegister = () => {
                     types: ['address']
                   }}
                 />
-                {Object.keys(errors).length && errors.address ? (
-                  <small className="text-danger mt-1">{errors.address.message}</small>
-                ) : null}
+                {Object.keys(errors).length && errors.address ? <small className="text-danger mt-1">{errors.address.message}</small> : null}
               </FormGroup>
               <FormGroup>
                 <Label>I consider myself a...</Label>
