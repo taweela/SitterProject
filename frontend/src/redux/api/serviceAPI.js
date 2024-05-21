@@ -43,8 +43,20 @@ export const serviceAPI = createApi({
       transformResponse(results) {
         return results.services;
       }
+    }),
+    createService: builder.mutation({
+      query(appointment) {
+        return {
+          url: '/create',
+          method: 'POST',
+          credentials: 'include',
+          body: appointment
+        };
+      },
+      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
+      transformResponse: (result) => result.service
     })
   })
 });
 
-export const { useGetServicesQuery } = serviceAPI;
+export const { useGetServicesQuery, useCreateServiceMutation } = serviceAPI;

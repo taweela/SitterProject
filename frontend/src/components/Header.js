@@ -20,6 +20,7 @@ import logo2Img from '../assets/images/logo/logo.png';
 import { getToken, getUserData } from '../utils/Utils';
 import { useLogoutUserMutation } from '../redux/api/getMeAPI';
 import toast from 'react-hot-toast';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -142,17 +143,28 @@ const Header = () => {
               {accessToken && userData?.role === 'serviceProvider' && (
                 <>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/service-provider/dashboard')}>Home</NavLink>
+                    <NavLink onClick={() => navigate('service-provider/dashboard')}>Home</NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/service-provider/services')}>Services</NavLink>
+                    <NavLink
+                      className={currentRoute.includes('service-provider/services') ? 'active' : ''}
+                      onClick={() => navigate('service-provider/services')}>
+                      Services
+                    </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/service-provider/orders')}>Orders</NavLink>
+                    <NavLink className={currentRoute.includes('service-provider/orders') ? 'active' : ''} onClick={() => navigate('service-provider/orders')}>
+                      Orders
+                    </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/service-provider/messages')}>Message</NavLink>
+                    <NavLink
+                      className={currentRoute.includes('service-provider/messages') ? 'active' : ''}
+                      onClick={() => navigate('/service-provider/messages')}>
+                      Message
+                    </NavLink>
                   </NavItem>
+                  <NotificationDropdown />
                   <UncontrolledDropdown nav inNavbar>
                     <DropdownToggle nav caret>
                       <img src={userImg} alt="Service Provider" className="user-img" />

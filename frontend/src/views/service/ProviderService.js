@@ -60,13 +60,13 @@ export const columns = () => [
   },
   {
     name: 'Type',
-    maxwidth: '100px',
     selector: (row) => `${row.type}`,
     sortable: true
   },
   {
-    name: 'Role',
-    cell: (row) => renderRole(row)
+    name: 'Price',
+    selector: (row) => `${row.price}`,
+    sortable: true
   },
   {
     name: 'Address',
@@ -166,7 +166,7 @@ const ProviderService = () => {
         </Row>
         <Row className="my-3">
           <Col md="4">
-            <Button size="sm" color="danger" onClick={() => navigate('/service-provider/new-service')}>
+            <Button size="sm" color="danger" onClick={() => navigate('/service-provider/services/create-service')}>
               <Plus size={14} />
               <span className="align-middle "> Post Service </span>
             </Button>
