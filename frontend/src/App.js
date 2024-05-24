@@ -17,6 +17,7 @@ import Error404 from './views/Error404';
 import ProviderMessage from './views/messages/ProviderMessage';
 import ProviderOrder from './views/order/ProviderOrder';
 import CreateProviderService from './views/service/CreateProviderService';
+import EditProviderService from './views/service/EditProviderService';
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="service-provider/dashboard" element={<ServiceProviderDashboard />} />
             <Route path="service-provider/services" element={<ProviderService />} />
             <Route path="service-provider/services/create-service" element={<CreateProviderService />} />
+            <Route path="service-provider/services/edit-service/:id" element={<EditProviderService />} />
             <Route path="service-provider/orders" element={<ProviderOrder />} />
             <Route path="service-provider/messages" element={<ProviderMessage />} />
           </Route>

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { useGetServicesQuery } from '../../redux/api/serviceAPI';
+import { useDeleteServiceMutation, useGetServicesQuery, useManageStatusServiceMutation } from '../../redux/api/serviceAPI';
 import { useNavigate } from 'react-router-dom';
 import {
   Badge,
@@ -23,7 +23,7 @@ import {
   ModalBody,
   ModalFooter
 } from 'reactstrap';
-import { ChevronDown, MoreVertical, Archive, Search, Trash2, Plus } from 'react-feather';
+import { ChevronDown, MoreVertical, Archive, Search, Trash2, Plus, Edit, Activity, WifiOff } from 'react-feather';
 import toast from 'react-hot-toast';
 
 const renderRole = (row) => (
@@ -35,10 +35,10 @@ const renderRole = (row) => (
 );
 
 const renderStatus = (row) => {
-  const color = row.status === 'active' ? 'success' : 'danger';
+  const color = row.status === 'active' ? 'light-success' : row.status === 'disabled' ? 'light-info' : 'light-danger';
   return (
     <span className="text-truncate text-capitalize align-middle">
-      <Badge color={color} className="px-2 py-1" pill>
+      <Badge color={color} pill>
         {row.status}
       </Badge>
     </span>
@@ -48,30 +48,36 @@ const renderStatus = (row) => {
 export const columns = () => [
   {
     name: 'Title',
-    maxwidth: '100px',
-    selector: (row) => `${row.title}`,
-    sortable: true
+    sortable: true,
+    minwidth: '350px',
+    sortactive: true,
+    cell: ({ title }) => title,
+    selector: (row) => row.title
   },
   {
     name: 'Description',
-    maxwidth: '100px',
+    minwidth: '350px',
     selector: (row) => `${row.description}`,
-    sortable: true
+    sortable: true,
+    cell: ({ description }) => description
   },
   {
     name: 'Type',
     selector: (row) => `${row.type}`,
-    sortable: true
+    sortable: true,
+    cell: ({ type }) => type
   },
   {
     name: 'Price',
     selector: (row) => `${row.price}`,
-    sortable: true
+    sortable: true,
+    cell: ({ price }) => price
   },
   {
     name: 'Address',
     selector: (row) => `${row.address}`,
-    sortable: true
+    sortable: true,
+    cell: ({ address }) => address
   },
   {
     name: 'Status',
@@ -79,47 +85,85 @@ export const columns = () => [
   },
   {
     name: 'Actions',
-    width: '120px',
+    minwidth: '120px',
     cell: (row) => {
       const navigate = useNavigate();
       const [modalVisibility, setModalVisibility] = useState(false);
-      // const [deleteUser, { isLoading, isError, error, isSuccess }] = useDeleteUserMutation();
-      // useEffect(() => {
-      //   if (isSuccess) {
-      //     toast.success(
-      //       <div className="d-flex align-items-center">
-      //         <span className="toast-title">User deleted successfully</span>
-      //       </div>,
-      //       {
-      //         duration: 4000,
-      //         position: 'top-right'
-      //       }
-      //     );
-      //     navigate('/admin/clients');
-      //   }
-      //   if (isError) {
-      //     toast.error(error.data.message, {
-      //       position: 'top-right'
-      //     });
-      //   }
-      // }, [isLoading]);
-      const handleDeleteUser = (id) => {
-        // deleteUser(id);
+      const [manageStatus, { isLoading: manageIsLoading, isError: manageIsError, isSuccess: manageIsSuccess, error: manageError }] =
+        useManageStatusServiceMutation();
+      const [deleteService, { isLoading, isError, error, isSuccess }] = useDeleteServiceMutation();
+      useEffect(() => {
+        if (isSuccess) {
+          toast.success(
+            <div className="d-flex align-items-center">
+              <span className="toast-title">Service deleted successfully</span>
+            </div>,
+            {
+              duration: 4000,
+              position: 'top-right'
+            }
+          );
+          navigate('/service-provider/services');
+        }
+        if (isError) {
+          toast.error(error.data.message, {
+            position: 'top-right'
+          });
+        }
+      }, [isLoading]);
+      useEffect(() => {
+        if (manageIsSuccess) {
+          toast.success(
+            <div className="d-flex align-items-center">
+              <span className="toast-title">Status changed successfully</span>
+            </div>,
+            {
+              duration: 4000,
+              position: 'top-right'
+            }
+          );
+          navigate('/service-provider/services');
+        }
+        if (manageIsError) {
+          toast.error(manageError.data.message, {
+            position: 'top-right'
+          });
+        }
+      }, [manageIsLoading]);
+      const handleDeleteService = (id) => {
+        deleteService(id);
         setModalVisibility(false);
       };
+
+      const handleManageStatus = (id, status) => {
+        manageStatus({ id: id, status: { status: status } });
+      };
+      console.log(row);
       return (
         <>
-          {row.role !== 'admin' && (
+          {row.status !== 'deleted' && (
             <>
               <UncontrolledDropdown>
                 <DropdownToggle tag="div" className="btn btn-sm">
                   <MoreVertical size={14} className="cursor-pointer action-btn" />
                 </DropdownToggle>
                 <DropdownMenu end container="body">
-                  <DropdownItem className="w-100" onClick={() => navigate(`/admin/profile-review/${row._id}`)}>
-                    <Archive size={14} className="mr-50" />
-                    <span className="align-middle mx-2">Review</span>
+                  <DropdownItem className="w-100" onClick={() => navigate(`/service-provider/services/edit-service/${row._id}`)}>
+                    <Edit size={14} className="mr-50" />
+                    <span className="align-middle mx-2">Edit</span>
                   </DropdownItem>
+                  {row.status == 'active' && (
+                    <DropdownItem className="w-100" onClick={() => handleManageStatus(row._id, 'disabled')}>
+                      <Activity size={14} className="mr-50" />
+                      <span className="align-middle mx-2">Disable</span>
+                    </DropdownItem>
+                  )}
+                  {row.status == 'disabled' && (
+                    <DropdownItem className="w-100" onClick={() => handleManageStatus(row._id, 'active')}>
+                      <Activity size={14} className="mr-50" />
+                      <span className="align-middle mx-2">Active</span>
+                    </DropdownItem>
+                  )}
                   <DropdownItem className="w-100" onClick={() => setModalVisibility(!modalVisibility)}>
                     <Trash2 size={14} className="mr-50" />
                     <span className="align-middle mx-2">Delete</span>
@@ -135,7 +179,7 @@ export const columns = () => [
                   </div>
                 </ModalBody>
                 <ModalFooter className="justify-content-start">
-                  <Button color="primary" onClick={() => handleDeleteUser(row._id)}>
+                  <Button color="danger" onClick={() => handleDeleteService(row._id)}>
                     Yes, Please Delete
                   </Button>
                   <Button color="secondary" onClick={() => setModalVisibility(!modalVisibility)} outline>
@@ -154,7 +198,7 @@ export const columns = () => [
 const ProviderService = () => {
   const navigate = useNavigate();
   const paginationRowsPerPageOptions = [15, 30, 50, 100];
-  const { data: services } = useGetServicesQuery();
+  const { data: services } = useGetServicesQuery({ refetchOnFocus: true, refetchOnReconnect: true });
   console.log(services);
   return (
     <div className="main-view">
@@ -172,19 +216,22 @@ const ProviderService = () => {
             </Button>
           </Col>
         </Row>
-        <Card>
-          <DataTable
-            title="Services"
-            data={services}
-            responsive
-            className="react-dataTable"
-            noHeader
-            pagination
-            paginationRowsPerPageOptions={paginationRowsPerPageOptions}
-            columns={columns()}
-            sortIcon={<ChevronDown />}
-          />
-        </Card>
+        <Fragment>
+          <div className="react-dataTable">
+            <DataTable
+              title="Services"
+              data={services}
+              responsive
+              className="react-dataTable"
+              noHeader
+              pagination
+              paginationServer
+              paginationRowsPerPageOptions={paginationRowsPerPageOptions}
+              columns={columns()}
+              sortIcon={<ChevronDown />}
+            />
+          </div>
+        </Fragment>
       </Container>
     </div>
   );

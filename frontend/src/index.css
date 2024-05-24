@@ -528,6 +528,11 @@ html body p {
   padding: 0 0.75rem;
 }
 
+.sidebar-content .chat-user-list-wrapper li:hover {
+  cursor: pointer;
+  background-color: #f8f8f8;
+}
+
 .sidebar-content .chat-user-list-wrapper li .chat-info .card-text,
 p {
     color: #b9b9c3;
@@ -758,11 +763,7 @@ body .content-right {
   font-size: 0.6rem;
   line-height: 0.786;
   right: -2px;
-}
-
-li.dropdown .dropdown-menu {
-  top: 1.2rem !important;
-}
+} 
 
 li.dropdown-notification .dropdown-menu-header {
   border-top-left-radius: 0.357rem;
@@ -835,4 +836,35 @@ li.dropdown-notification .dropdown-menu-footer {
 
 .dropdown-menu-media .dropdown-menu-footer {
   border-top: 1px solid #ebe9f1;
+}
+
+.avatar-content {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 0.857rem;
+}
+
+.bg-light-success {
+  color: #28c76f !important;
+  background: rgba(40, 199, 111, 0.12) !important;
+}
+
+.bg-light-info {
+  color: #00cfe8 !important;
+  background: rgba(0, 207, 232, 0.12) !important;
+
+}
+
+.bg-light-primary {
+  color: #7367f0 !important;
+  background: rgba(115, 103, 240, 0.12) !important;
+}
+
+.bg-light-danger {
+  background: rgba(234, 84, 85, 0.12) !important;
+  color: #ea5455 !important;
 }

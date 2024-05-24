@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import { Form, FormGroup, Label, Button, Card, CardBody } from 'reactstrap';
 import { useForm } from 'react-hook-form';
@@ -8,6 +9,8 @@ import toast from 'react-hot-toast';
 import { useLoginUserMutation } from '../../redux/api/authAPI';
 import { useEffect } from 'react';
 import { getUserData } from '../../utils/Utils';
+import { Coffee, X } from 'react-feather';
+import Avatar from '../../components/Avatar';
 
 const Login = () => {
   const {
@@ -26,23 +29,34 @@ const Login = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success(
-        <div className="d-flex align-items-center">
-          <span className="toast-title">Welcome, Success Login!</span>
-        </div>,
+      const user = getUserData();
+      const userInfo = JSON.parse(user);
+      console.log(userInfo);
+      toast(
+        (t) => (
+          <div className="d-flex">
+            <div className="me-2">
+              <Avatar size="sm" color="success" icon={<Coffee size={14} />} />
+            </div>
+            <div className="d-flex flex-column">
+              <div className="d-flex justify-content-between">
+                <h6>{userInfo.firstName}</h6>
+                <X size={12} className="cursor-pointer" onClick={() => toast.dismiss(t.id)} />
+              </div>
+              <span>You have successfully logged in as an {userInfo.role} user to SmartSitter. Now you can start to explore. Enjoy!</span>
+            </div>
+          </div>
+        ),
         {
           duration: 4000,
           position: 'top-right'
         }
       );
-      const user = getUserData();
-      if (user) {
-        const userInfo = JSON.stringify(user);
-        if (userInfo.role == 'client') {
-          navigate('/client/dashboard');
-        } else {
-          navigate('/service-provider/dashboard');
-        }
+
+      if (userInfo.role == 'client') {
+        navigate('/client/dashboard');
+      } else {
+        navigate('/service-provider/dashboard');
       }
     }
 

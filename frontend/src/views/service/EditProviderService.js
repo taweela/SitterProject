@@ -11,56 +11,71 @@ import { isObjEmpty } from '../../utils/Utils';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/themes/material_blue.css';
 import moment from 'moment';
-import { useCreateServiceMutation } from '../../redux/api/serviceAPI';
-import { useNavigate } from 'react-router-dom';
+import { useGetServiceQuery, useUpdateServiceMutation } from '../../redux/api/serviceAPI';
+import { useNavigate, useParams } from 'react-router-dom';
 
-const CreateProviderService = () => {
+const EditProviderService = () => {
+  const { id } = useParams();
   const [isProcessing, setProcessing] = useState(false);
   const [addressObj, setAddressObj] = useState();
   const [fromDate, setFromDate] = useState();
   const [toDate, setToDate] = useState();
   const [fromTime, setFromTime] = useState();
   const [toTime, setToTime] = useState('');
+  const [providerAddress, setProviderAddress] = useState();
+  const [selectedType, setSelectedType] = useState(null);
   const navigate = useNavigate();
 
-  const [createService, { isLoading, isError, error, isSuccess }] = useCreateServiceMutation();
+  const [updateService, { isLoading, isError, error, isSuccess }] = useUpdateServiceMutation();
+  const { data: service } = useGetServiceQuery(id);
+  console.log(service);
   const {
     register,
     handleSubmit,
     formState: { errors },
     clearErrors,
-    control,
-    setError
+    setValue,
+    setError,
+    control
   } = useForm();
 
   const serviceTypeOptions = [
     { value: 'fixed', label: 'Fixed' },
     { value: 'hourly', label: 'Hourly' }
   ];
-  console.log(errors);
-  const onSubmit = (data) => {
-    if (!addressObj) {
-      errors.address = {};
-      setError('address', {
-        type: 'manual',
-        message: 'Please select an address using the suggested option'
-      });
+
+  useEffect(() => {
+    if (service && service.type) {
+      const selectedOption = serviceTypeOptions.find((option) => option.value == service.type);
+      setSelectedType(selectedOption);
     }
+  }, [service]);
+
+  useEffect(() => {
+    if (service) {
+      const fields = ['title', 'description', 'price', 'fromDate', 'toDate', 'fromTime', 'toTime'];
+      fields.forEach((field) => setValue(field, service[field]));
+      setValue('serviceType', selectedType);
+      setProviderAddress(service.address);
+    }
+  }, [setValue, service, selectedType]);
+  const onSubmit = (data) => {
     if (isObjEmpty(errors)) {
       setProcessing(true);
       data.serviceType = data.serviceType.value;
-      if (addressObj.geometry) {
-        const { lat, lng } = addressObj.geometry.location;
-        const latitude = lat();
-        const longitude = lng();
-        data.latitude = latitude;
-        data.longitude = longitude;
-        data.address = addressObj.formatted_address;
-      } else {
-        data.address = addressObj;
+      if (addressObj) {
+        if (addressObj.geometry) {
+          const { lat, lng } = addressObj.geometry.location;
+          const latitude = lat();
+          const longitude = lng();
+          data.latitude = latitude;
+          data.longitude = longitude;
+          data.address = addressObj.formatted_address;
+        } else {
+          data.address = addressObj;
+        }
       }
-      console.log(data);
-      createService(data);
+      updateService({ id: id, service: data });
     }
   };
 
@@ -69,7 +84,7 @@ const CreateProviderService = () => {
       setProcessing(false);
       toast.success(
         <div className="d-flex align-items-center">
-          <span className="toast-title">Service Posted successfully!</span>
+          <span className="toast-title">Service updated successfully!</span>
         </div>,
         {
           duration: 4000,
@@ -95,7 +110,7 @@ const CreateProviderService = () => {
       <Container>
         <Row className="my-3">
           <Col>
-            <h4 className="main-title">Create Service</h4>
+            <h4 className="main-title">Edit Service</h4>
           </Col>
         </Row>
         <Form onSubmit={handleSubmit(onSubmit)}>
@@ -140,7 +155,16 @@ const CreateProviderService = () => {
                           name="serviceType"
                           control={control}
                           rules={{ required: true }}
-                          render={({ field }) => <Select {...field} options={serviceTypeOptions} />}
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              options={serviceTypeOptions}
+                              onChange={(value) => {
+                                setSelectedType(value);
+                                field.onChange(value);
+                              }}
+                            />
+                          )}
                         />
                         {errors.serviceType && <p className="text-danger mt-1">ServiceType is required.</p>}
                       </FormGroup>
@@ -276,7 +300,8 @@ const CreateProviderService = () => {
                           Area
                         </Label>
                         <Autocomplete
-                          className="form-control"
+                          defaultValue={providerAddress}
+                          className={`form-control ${classnames({ 'is-invalid': errors.address })}`}
                           apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
                           onChange={(e) => setAddressObj()}
                           onPlaceSelected={(place) => {
@@ -300,7 +325,7 @@ const CreateProviderService = () => {
                               <Spinner color="light" size="sm" />
                             </div>
                           )}
-                          <span>Post Service</span>
+                          <span>Update Service</span>
                         </Button>
                       </FormGroup>
                     </Col>
@@ -315,4 +340,4 @@ const CreateProviderService = () => {
   );
 };
 
-export default CreateProviderService;
+export default EditProviderService;

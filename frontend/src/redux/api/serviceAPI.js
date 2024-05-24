@@ -44,19 +44,74 @@ export const serviceAPI = createApi({
         return results.services;
       }
     }),
+    getService: builder.query({
+      query(id) {
+        return {
+          url: `/getService/${id}`,
+          credentials: 'include'
+        };
+      },
+      providesTags: (result, error, id) => {
+        return [{ type: 'Services', id }];
+      },
+      transformResponse(result) {
+        return result;
+      }
+    }),
     createService: builder.mutation({
-      query(appointment) {
+      query(payload) {
         return {
           url: '/create',
           method: 'POST',
           credentials: 'include',
-          body: appointment
+          body: payload
         };
       },
       invalidatesTags: [{ type: 'Services', id: 'LIST' }],
       transformResponse: (result) => result.service
+    }),
+    updateService: builder.mutation({
+      query({ id, service }) {
+        return {
+          url: `/update/${id}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: service
+        };
+      },
+      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
+      transformResponse: (result) => result.service
+    }),
+    manageStatusService: builder.mutation({
+      query({ id, status }) {
+        return {
+          url: `/manageStatus/${id}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: status
+        };
+      },
+      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
+      transformResponse: (result) => result
+    }),
+    deleteService: builder.mutation({
+      query(id) {
+        return {
+          url: `/delete/${id}`,
+          method: 'DELETE',
+          credentials: 'include'
+        };
+      },
+      invalidatesTags: [{ type: 'Services', id: 'LIST' }]
     })
   })
 });
 
-export const { useGetServicesQuery, useCreateServiceMutation } = serviceAPI;
+export const {
+  useGetServicesQuery,
+  useCreateServiceMutation,
+  useGetServiceQuery,
+  useUpdateServiceMutation,
+  useDeleteServiceMutation,
+  useManageStatusServiceMutation
+} = serviceAPI;
