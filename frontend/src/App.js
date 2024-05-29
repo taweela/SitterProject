@@ -18,6 +18,9 @@ import ProviderMessage from './views/messages/ProviderMessage';
 import ProviderOrder from './views/order/ProviderOrder';
 import CreateProviderService from './views/service/CreateProviderService';
 import EditProviderService from './views/service/EditProviderService';
+import ClientServiceProvider from './views/client/ClientServiceProvider';
+import ClientDashboard from './views/dashboard/ClientDashboard';
+import ClientSeriveProviderView from './views/client/ClientServiceProviderView';
 
 const App = () => {
   return (
@@ -32,6 +35,11 @@ const App = () => {
           </Route>
           <Route element={<RequiredUser allowedRoles={['admin', 'client']} />}>
             <Route path="admin/profile-review/:id" element={<Profile />} />
+          </Route>
+          <Route element={<RequiredUser allowedRoles={['client']} />}>
+            <Route path="client/dashboard" element={<ClientDashboard />} />
+            <Route path="client/service-providers" element={<ClientServiceProvider />} />
+            <Route path="client/service-providers/view/:id" element={<ClientSeriveProviderView />} />
           </Route>
           <Route element={<RequiredUser allowedRoles={['serviceProvider']} />}>
             <Route path="service-provider/dashboard" element={<ServiceProviderDashboard />} />

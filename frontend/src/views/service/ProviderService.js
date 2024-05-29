@@ -199,7 +199,7 @@ const ProviderService = () => {
   const navigate = useNavigate();
   const paginationRowsPerPageOptions = [15, 30, 50, 100];
   const { data: services } = useGetServicesQuery({ refetchOnFocus: true, refetchOnReconnect: true });
-  console.log(services);
+
   return (
     <div className="main-view">
       <Container>

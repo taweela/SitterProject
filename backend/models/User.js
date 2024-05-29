@@ -40,7 +40,6 @@ const userSchema = new mongoose.Schema({
     },
     providerType: {
         type: String,
-        required: true,
     },
     status: {
         type: String,

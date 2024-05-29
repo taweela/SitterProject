@@ -125,6 +125,13 @@ const Header = () => {
                     <NavLink onClick={() => navigate('/client/dashboard')}>Home</NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
+                    <NavLink
+                      className={currentRoute.includes('client/service-providers') ? 'active' : ''}
+                      onClick={() => navigate('/client/service-providers')}>
+                      Service Providers
+                    </NavLink>
+                  </NavItem>
+                  <NavItem className="nav-item-responsive">
                     <NavLink onClick={() => navigate('/client/clients')}>Order</NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">

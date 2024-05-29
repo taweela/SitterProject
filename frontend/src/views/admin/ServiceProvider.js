@@ -174,8 +174,6 @@ const ServiceProvider = () => {
   const paginationRowsPerPageOptions = [15, 30, 50, 100];
   const { data: users, isError, isSuccess, error, isLoading, refetch } = useGetUsersQuery(queryParams);
 
-  console.log(users, isLoading);
-
   const handleFilter = (q) => {
     setSearchItem(q);
   };

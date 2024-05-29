@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const router = require('express').Router();
 
-router.get('/', verifyToken(['serviceProvider']), async (req, res) => {
+router.get('/', verifyToken(['client', 'serviceProvider']), async (req, res) => {
     const reqUser = req.user;
     let pFilter;
     if (reqUser && reqUser.role == 'serviceProvider') {

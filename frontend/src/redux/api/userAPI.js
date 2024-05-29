@@ -55,6 +55,31 @@ export const userAPI = createApi({
         return results.users;
       }
     }),
+    getProviders: builder.query({
+      query: (args) => {
+        return {
+          url: '/serviceProvider',
+          params: { ...args },
+          credentials: 'include'
+        };
+      },
+      providesTags(result) {
+        if (result && result.users) {
+          return [
+            ...result.users.map(({ id }) => ({
+              type: 'Users',
+              id
+            })),
+            { type: 'Users', id: 'LIST' }
+          ];
+        } else {
+          return [{ type: 'Users', id: 'LIST' }];
+        }
+      },
+      transformResponse(results) {
+        return results;
+      }
+    }),
     getUser: builder.query({
       query(id) {
         return {
@@ -82,4 +107,4 @@ export const userAPI = createApi({
   })
 });
 
-export const { useGetUsersQuery, useGetUserQuery, useUpdateUserMutation, useDeleteUserMutation } = userAPI;
+export const { useGetUsersQuery, useGetUserQuery, useGetProvidersQuery, useUpdateUserMutation, useDeleteUserMutation } = userAPI;
