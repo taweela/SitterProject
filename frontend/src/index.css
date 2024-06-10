@@ -1235,3 +1235,23 @@ ul.navbar-nav li.dropdown-user .dropdown-menu {
   justify-content: center;
   align-items: center;
 }
+
+.filter-title {
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+}
+
+.list-unstyled {
+  padding-left: 0;
+}
+
+.serviceType-list li {
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-check {
+  padding-left: 1.785rem;
+}

@@ -13,6 +13,7 @@ import {
   Input,
   InputGroup,
   InputGroupText,
+  Label,
   Pagination,
   PaginationItem,
   PaginationLink,
@@ -54,6 +55,21 @@ const ClientServiceProvider = () => {
   const handleFavourite = (id, val) => {
     console.log(id, val);
   };
+
+  const serviceTypes = [
+    {
+      type: 'Babysitter',
+      value: 'babysitter'
+    },
+    {
+      type: 'Dogsitter',
+      value: 'dogsitter'
+    },
+    {
+      type: 'Housekeeper',
+      value: 'housekeeper'
+    }
+  ];
 
   // ** Render pages
   const renderPageItems = () => {
@@ -110,95 +126,183 @@ const ClientServiceProvider = () => {
   return (
     <div className="main-view">
       <Container>
-        <Row className="my-3">
-          <Col sm="12">
-            <InputGroup className="input-group-merge">
-              <Input
-                className="search-provider"
-                placeholder="Search Service Provider"
-                value={searchItem}
-                onChange={(e) => handleFilter(e.target.value ? e.target.value : '')}
-              />
-              <InputGroupText>
-                <Search className="text-muted" size={14} />
-              </InputGroupText>
-            </InputGroup>
+        <Row>
+          <Col md="3">
+            <Row className="my-4">
+              <Col sm="12">
+                <h6 className="filter-heading d-none d-lg-block">Filters</h6>
+              </Col>
+            </Row>
+            <Card>
+              <CardBody>
+                <div className="multi-range-price">
+                  <h6 className="filter-title mt-0">Multi Range</h6>
+                  <ul className="list-unstyled price-range">
+                    <li>
+                      <div className="form-check">
+                        <Input type="radio" id="all" name="price-range-radio" defaultChecked />
+                        <Label className="form-check-label" for="all">
+                          All
+                        </Label>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="form-check">
+                        <Input type="radio" id="10-dollars-below" name="price-range-radio" />
+                        <Label className="form-check-label" for="10-dollars-below">{`<=$10`}</Label>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="form-check">
+                        <Input type="radio" id="10-100-dollars" name="price-range-radio" />
+                        <Label className="form-check-label" for="10-100-dollars">
+                          $10-$100
+                        </Label>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="form-check">
+                        <Input type="radio" id="100-500-dollars" name="price-range-radio" />
+                        <Label className="form-check-label" for="100-500-dollars">
+                          {`>=$100`}
+                        </Label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div className="serviceType">
+                  <h6 className="filter-title">Service Type</h6>
+                  <ul className="list-unstyled serviceType-list">
+                    {serviceTypes.map((serviceType, index) => {
+                      return (
+                        <li key={index}>
+                          <div className="form-check">
+                            <Input type="checkbox" id={serviceType.type} defaultChecked={serviceType.checked} />
+                            <Label className="form-check-label" for={serviceType.type}>
+                              {serviceType.type}
+                            </Label>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div id="clear-filters">
+                  <Button color="primary" block>
+                    Clear All Filters
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
           </Col>
-        </Row>
-        <Row className="my-2">
-          <Col sm="12">
-            {isLoading ? (
-              <SpinnerComponent />
-            ) : provider && provider.users.length ? (
-              <div>
-                {provider.users.map((item, index) => (
-                  <Card className="provider-service-card" key={index}>
-                    <div className="item-img text-center mx-auto">
-                      <Link to={`/client/service-providers/view/${item._id}`}>
-                        <img className="img-fluid card-img-top" src={userImg} alt={item.firstName} />
-                      </Link>
-                    </div>
-                    <CardBody>
-                      <h6 className="item-name">
-                        <Link className="text-body" to={`/client/service-providers/view/${item._id}`}>
-                          <span className="provider-style">
-                            {item.firstName} {item.lastName}
-                          </span>
-                        </Link>
-                        <div className="provider-style my-2">{item.providerType}</div>
-                      </h6>
-                      <div className="item-wrapper">
-                        <div className="item-rating">
-                          <ul className="unstyled-list list-inline">{renderStars(item)}</ul>
+          <Col md="9">
+            <Row className="my-3">
+              <Col sm="4">
+                <InputGroup className="input-group-merge">
+                  <Input
+                    className="search-provider"
+                    placeholder="Search Service Provider"
+                    value={searchItem}
+                    onChange={(e) => handleFilter(e.target.value ? e.target.value : '')}
+                  />
+                  <InputGroupText>
+                    <Search className="text-muted" size={14} />
+                  </InputGroupText>
+                </InputGroup>
+              </Col>
+              <Col sm="4">
+                <InputGroup className="input-group-merge">
+                  <Input
+                    className="search-provider"
+                    placeholder="Search Service Provider"
+                    value={searchItem}
+                    onChange={(e) => handleFilter(e.target.value ? e.target.value : '')}
+                  />
+                  <InputGroupText>
+                    <Search className="text-muted" size={14} />
+                  </InputGroupText>
+                </InputGroup>
+              </Col>
+            </Row>
+            <Row className="my-2">
+              <Col sm="12">
+                {isLoading ? (
+                  <SpinnerComponent />
+                ) : provider && provider.users.length ? (
+                  <div>
+                    {provider.users.map((item, index) => (
+                      <Card className="provider-service-card" key={index}>
+                        <div className="item-img text-center mx-auto">
+                          <Link to={`/client/service-providers/view/${item._id}`}>
+                            <img className="img-fluid card-img-top" src={userImg} alt={item.firstName} />
+                          </Link>
                         </div>
-                      </div>
-                      <CardText className="item-description">
-                        Finding a qualified babysitter takes time and effort. But your reward is knowing that your child is in capable hands. You will want to
-                        find someone who is mature and friendly, has common sense, and is genuinely fond of children.
-                      </CardText>
-                    </CardBody>
-                    <div className="item-options text-center">
-                      <div className="item-wrapper">
-                        <div className="item-cost">
-                          <h4 className="item-price mb-2">${item.rate}</h4>
-                          {item.hasFreeShipping && (
-                            <CardText className="shipping">
-                              <Badge color="light-success">Free Shipping</Badge>
-                            </CardText>
-                          )}
+                        <CardBody>
+                          <h6 className="item-name">
+                            <Link className="text-body" to={`/client/service-providers/view/${item._id}`}>
+                              <span className="provider-style">
+                                {item.firstName} {item.lastName}
+                              </span>
+                            </Link>
+                            <div className="provider-style my-2">{item.providerType}</div>
+                          </h6>
+                          <div className="item-wrapper">
+                            <div className="item-rating">
+                              <ul className="unstyled-list list-inline">{renderStars(item)}</ul>
+                            </div>
+                          </div>
+                          <CardText className="item-description">
+                            Finding a qualified babysitter takes time and effort. But your reward is knowing that your child is in capable hands. You will want
+                            to find someone who is mature and friendly, has common sense, and is genuinely fond of children.
+                          </CardText>
+                        </CardBody>
+                        <div className="item-options text-center">
+                          <div className="item-wrapper">
+                            <div className="item-cost">
+                              <h4 className="item-price mb-2">${item.rate}</h4>
+                              {item.hasFreeShipping && (
+                                <CardText className="shipping">
+                                  <Badge color="light-success">Free Shipping</Badge>
+                                </CardText>
+                              )}
+                            </div>
+                          </div>
+                          <Button className="btn-favourite" color="light" onClick={() => handleFavourite(item._id, item.isInFavourite)}>
+                            <Heart
+                              className={classnames('me-50', {
+                                'text-danger': item.isInFavourite
+                              })}
+                              size={18}
+                            />
+                            <span>Favourite</span>
+                          </Button>
+                          <Button color="primary" className="btn-contact move-contact">
+                            <Share2 className="me-50" size={18} />
+                            <span>Contact</span>
+                          </Button>
                         </div>
-                      </div>
-                      <Button className="btn-favourite" color="light" onClick={() => handleFavourite(item._id, item.isInFavourite)}>
-                        <Heart
-                          className={classnames('me-50', {
-                            'text-danger': item.isInFavourite
-                          })}
-                          size={18}
-                        />
-                        <span>Favourite</span>
-                      </Button>
-                      <Button color="primary" className="btn-contact move-contact">
-                        <Share2 className="me-50" size={18} />
-                        <span>Contact</span>
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-                <Pagination className="d-flex justify-content-center service-provider-pagination mt-2">
-                  <PaginationItem disabled={page === 1} className="prev-item" onClick={() => (page !== 1 ? handlePageChange('prev') : null)}>
-                    <PaginationLink href="/" onClick={(e) => e.preventDefault()}></PaginationLink>
-                  </PaginationItem>
-                  {renderPageItems()}
-                  <PaginationItem className="next-item" onClick={() => handleNext()} disabled={page === Number(provider.totalCount) / provider.users.length}>
-                    <PaginationLink href="/" onClick={(e) => e.preventDefault()}></PaginationLink>
-                  </PaginationItem>
-                </Pagination>
-              </div>
-            ) : (
-              <div className="d-flex justify-content-center mt-2">
-                <p>No Results</p>
-              </div>
-            )}
+                      </Card>
+                    ))}
+                    <Pagination className="d-flex justify-content-center service-provider-pagination mt-2">
+                      <PaginationItem disabled={page === 1} className="prev-item" onClick={() => (page !== 1 ? handlePageChange('prev') : null)}>
+                        <PaginationLink href="/" onClick={(e) => e.preventDefault()}></PaginationLink>
+                      </PaginationItem>
+                      {renderPageItems()}
+                      <PaginationItem
+                        className="next-item"
+                        onClick={() => handleNext()}
+                        disabled={page === Number(provider.totalCount) / provider.users.length}>
+                        <PaginationLink href="/" onClick={(e) => e.preventDefault()}></PaginationLink>
+                      </PaginationItem>
+                    </Pagination>
+                  </div>
+                ) : (
+                  <div className="d-flex justify-content-center mt-2">
+                    <p>No Results</p>
+                  </div>
+                )}
+              </Col>
+            </Row>
           </Col>
         </Row>
       </Container>
