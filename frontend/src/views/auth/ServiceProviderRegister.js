@@ -41,6 +41,7 @@ const ServiceProviderRegister = () => {
       registerUser(data);
     }
   };
+  console.log(errors);
 
   useEffect(() => {
     if (isSuccess) {
@@ -112,7 +113,7 @@ const ServiceProviderRegister = () => {
                       id="firstName"
                       {...register('firstName', { required: true })}
                     />
-                    {errors.email && <span className="text-danger">First Name is required.</span>}
+                    {errors.email && <span className="small text-danger">First Name is required.</span>}
                   </FormGroup>
                 </div>
                 <div className="col-sm-6">
@@ -124,7 +125,7 @@ const ServiceProviderRegister = () => {
                       id="lastName"
                       {...register('lastName', { required: true })}
                     />
-                    {errors.email && <span className="text-danger">Last Name is required.</span>}
+                    {errors.email && <span className="small text-danger">Last Name is required.</span>}
                   </FormGroup>
                 </div>
               </div>
@@ -137,7 +138,7 @@ const ServiceProviderRegister = () => {
                   id="email"
                   {...register('email', { required: true })}
                 />
-                {errors.email && <span className="text-danger">Email is required.</span>}
+                {errors.email && <span className="small text-danger">Email is required.</span>}
               </FormGroup>
               <FormGroup>
                 <Label>Password</Label>
@@ -147,7 +148,7 @@ const ServiceProviderRegister = () => {
                   id="password"
                   {...register('password', { required: true })}
                 />
-                {errors.password && <span className="text-danger">Password is required.</span>}
+                {errors.password && <span className="small text-danger">Password is required.</span>}
               </FormGroup>
               <FormGroup>
                 <Label>Address</Label>
@@ -173,7 +174,7 @@ const ServiceProviderRegister = () => {
                     types: ['address']
                   }}
                 />
-                {Object.keys(errors).length && errors.address ? <small className="text-danger mt-1">{errors.address.message}</small> : null}
+                {Object.keys(errors).length && errors.address ? <small className="small text-danger mt-1">{errors.address.message}</small> : null}
               </FormGroup>
               <FormGroup>
                 <Label>I consider myself a...</Label>
@@ -181,9 +182,17 @@ const ServiceProviderRegister = () => {
                   name="providerType"
                   control={control}
                   rules={{ required: true }}
-                  render={({ field }) => <Select {...field} options={providerTypeOptions} />}
+                  render={({ field }) => (
+                    <Select
+                      isClearable
+                      classNamePrefix="select"
+                      className={classnames('react-select', { 'is-invalid': errors.providerType })}
+                      {...field}
+                      options={providerTypeOptions}
+                    />
+                  )}
                 />
-                {errors.providerType && <p className="text-danger mt-1">ProviderType is required.</p>}
+                {errors.providerType && <p className="small text-danger mt-1">ProviderType is required.</p>}
               </FormGroup>
               <div className="mt-4">
                 <Button color="danger" className="btn-block w-100" type="submit">

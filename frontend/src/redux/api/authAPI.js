@@ -33,11 +33,10 @@ export const authAPI = createApi({
       },
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
-          const response = await queryFulfilled;
-          console.log(response.data);
+          const { data } = await queryFulfilled;
           //   socket.emit('login', response.data.userData._id);
-          setToken(response.data.accessToken);
-          setUserData(JSON.stringify(response.data.userData));
+          setToken(data.accessToken);
+          setUserData(JSON.stringify(data.userData));
           await dispatch(getMeAPI.endpoints.getMe.initiate(null));
         } catch (error) {
           console.log(error);

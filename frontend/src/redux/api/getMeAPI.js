@@ -82,8 +82,33 @@ export const getMeAPI = createApi({
           console.log(error);
         }
       }
+    }),
+    uploadProfileAvatar: builder.mutation({
+      query: (avatarFile) => {
+        var formData = new FormData();
+        formData.append('avatar', avatarFile);
+        return {
+          url: '/upload/avatar',
+          method: 'PUT',
+          credentials: 'include',
+          body: formData
+        };
+      },
+      invalidatesTags: [{ type: 'Users', id: 'LIST' }],
+      transformResponse(result) {
+        return result;
+      },
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          const response = await queryFulfilled;
+          setUserData(JSON.stringify(response.data.updateAvatar));
+          dispatch(setUser(response.data.updateAvatar));
+        } catch (error) {
+          console.log(error);
+        }
+      }
     })
   })
 });
 
-export const { useUpdateMeMutation, useLogoutUserMutation } = getMeAPI;
+export const { useUpdateMeMutation, useLogoutUserMutation, useUploadProfileAvatarMutation } = getMeAPI;

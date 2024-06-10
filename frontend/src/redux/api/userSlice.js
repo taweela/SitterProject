@@ -1,12 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { getUserData } from '../../utils/Utils';
 
 const initialState = {
-  user: null
+  user: getUserData() ? JSON.parse(getUserData()) : null
 };
 
 export const userSlice = createSlice({
-  initialState,
   name: 'userSlice',
+  initialState,
   reducers: {
     logout: () => initialState,
     setUser: (state, action) => {

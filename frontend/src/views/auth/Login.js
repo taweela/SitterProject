@@ -43,7 +43,7 @@ const Login = () => {
                 <h6>{userInfo.firstName}</h6>
                 <X size={12} className="cursor-pointer" onClick={() => toast.dismiss(t.id)} />
               </div>
-              <span>You have successfully logged in as an {userInfo.role} user to SmartSitter. Now you can start to explore. Enjoy!</span>
+              <span className="small">You have successfully logged in as an {userInfo.role} user to SmartSitter. Now you can start to explore. Enjoy!</span>
             </div>
           </div>
         ),
@@ -55,7 +55,7 @@ const Login = () => {
 
       if (userInfo.role == 'client') {
         navigate('/client/dashboard');
-      } else {
+      } else if (userInfo.role == 'serviceProvider') {
         navigate('/service-provider/dashboard');
       }
     }

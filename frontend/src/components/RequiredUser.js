@@ -1,23 +1,21 @@
 /* eslint-disable react/prop-types */
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import SpinnerComponent from './SpinnerComponent';
-import { getToken } from '../utils/Utils';
-import { getMeAPI } from '../redux/api/getMeAPI';
+import { getToken, getUserData } from '../utils/Utils';
 
 const RequiredUser = ({ allowedRoles }) => {
   const accessToken = getToken();
 
-  const { data: user } = getMeAPI.endpoints.getMe.useQuery(null);
+  const user = getUserData() ? JSON.parse(getUserData()) : null;
   const location = useLocation();
 
   if (accessToken && !user) {
     return <SpinnerComponent />;
   }
-  console.log(accessToken, user);
 
   return accessToken && allowedRoles.includes(user?.role) ? (
     <Outlet />
-  ) : accessToken && user ? (
+  ) : accessToken ? (
     <Navigate to="/unauthorized" state={{ from: location }} replace />
   ) : (
     <Navigate to="/login" state={{ from: location }} replace />

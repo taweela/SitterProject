@@ -30,6 +30,7 @@ const serviceRoute = require('./routes/services');
 
 // increase parse limit
 app.use(bodyParser.json({ limit: '50mb', extended: true }));
+app.use(express.static("public"))
 
 // Middleware
 app.use(
@@ -37,6 +38,7 @@ app.use(
         credentials: true,
         origin: [
             'http://localhost:3000',
+            'http://localhost:3001',
         ],
     }),
 );
