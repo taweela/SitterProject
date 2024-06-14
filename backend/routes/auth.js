@@ -75,15 +75,6 @@ router.post('/register', async (req, res) => {
 
 // Endpoint: Login user
 router.post('/login', async (req, res) => {
-  const acceptLanguage = req.headers['accept-language'];
-  
-  const countryMatch = acceptLanguage.match(/([a-z]{2})/);
-  const country = countryMatch ? countryMatch[1] : null;
-
-  // Extract currency code
-  const currencyMatch = acceptLanguage.match(/([A-Z]{3})/); 
-  const currency = currencyMatch ? currencyMatch[1] : null;
-  console.log(country, currency, '----------')
   // validate request
   const { error } = loginValidation(req.body);
   if (error) { return res.status(400).send(error.details[0].message); }

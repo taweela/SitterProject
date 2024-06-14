@@ -1255,3 +1255,22 @@ ul.navbar-nav li.dropdown-user .dropdown-menu {
 .form-check {
   padding-left: 1.785rem;
 }
+
+.form-check-input:checked {
+  background-color: #7367f0;
+  border-color: #7367f0;
+}
+
+.form-check-input {
+  width: 1.285rem;
+  height: 1.285rem;
+  vertical-align: top;
+  appearance: none;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.form-check-input {
+  float: left;
+  margin-left: -1.785rem;
+}
