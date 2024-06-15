@@ -59,7 +59,6 @@ const CreateProviderService = () => {
       } else {
         data.address = addressObj;
       }
-      console.log(data);
       createService(data);
     }
   };

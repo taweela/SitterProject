@@ -15,13 +15,10 @@ const authConfig = {
 
 // Endpoint: Register Users
 router.post('/register', async (req, res) => {
-  console.log(req.body, req.body.role)
   // validate request
   const { error } = req.body.role == 'client' ? registerValidation(req.body) : registerProviderValidation(req.body);
-  console.log(error)
   
   if (error) return res.status(400).send(error.details[0].message);
-  console.log("0000000000000")
   // check for unique user
   const emailExists = await User.findOne({ email: req.body.email });
   if (emailExists) { return res.status(400).send('Email already exists'); }

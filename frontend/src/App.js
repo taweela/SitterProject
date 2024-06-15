@@ -24,6 +24,7 @@ import ClientSeriveProviderView from './views/client/ClientServiceProviderView';
 import ClientProfile from './views/profile/ClientProfile';
 import ProviderProfile from './views/profile/ProviderProfile';
 import ClientMessage from './views/messages/ClientMessage';
+import ClientOrder from './views/order/ClientOrder';
 
 const App = () => {
   return (
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="client/dashboard" element={<ClientDashboard />} />
             <Route path="client/service-providers" element={<ClientServiceProvider />} />
             <Route path="client/service-providers/view/:id" element={<ClientSeriveProviderView />} />
+            <Route path="client/orders" element={<ClientOrder />} />
             <Route path="client/profile" element={<ClientProfile />} />
             <Route path="client/message" element={<ClientMessage />} />
           </Route>

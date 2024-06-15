@@ -138,7 +138,6 @@ export const columns = () => [
       const handleManageStatus = (id, status) => {
         manageStatus({ id: id, status: { status: status } });
       };
-      console.log(row);
       return (
         <>
           {row.status !== 'deleted' && (

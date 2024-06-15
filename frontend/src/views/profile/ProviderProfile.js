@@ -7,7 +7,6 @@ import { getMeAPI } from '../../redux/api/getMeAPI';
 
 const ProviderProfile = () => {
   const { data: user, isLoading } = getMeAPI.endpoints.getMe.useQuery(null);
-  console.log(user, isLoading);
 
   return (
     <div className="main-view">

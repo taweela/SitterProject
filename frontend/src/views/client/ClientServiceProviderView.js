@@ -1,6 +1,6 @@
 import { Button, Card, CardBody, CardText, Col, Container, Row } from 'reactstrap';
 import classnames from 'classnames';
-import { DollarSign, Heart, Share2, ShoppingCart, Star } from 'react-feather';
+import { Aperture, DollarSign, Heart, Share2, ShoppingCart, Star } from 'react-feather';
 import { useGetUserQuery } from '../../redux/api/userAPI';
 import { useParams } from 'react-router-dom';
 import SpinnerComponent from '../../components/SpinnerComponent';
@@ -9,7 +9,6 @@ import userImg from '../../assets/images/user.png';
 const ClientSeriveProviderView = () => {
   const { id } = useParams();
   const { data: provider, isLoading } = useGetUserQuery(id);
-  console.log(provider, isLoading);
 
   const handleFavourite = (favourite) => {
     console.log(favourite);
@@ -99,6 +98,10 @@ const ClientSeriveProviderView = () => {
                         })}
                       />
                       <span>Favourite</span>
+                    </Button>
+                    <Button color="danger" className="btn-contact move-contact">
+                      <Aperture className="me-50" size={18} />
+                      <span>Order</span>
                     </Button>
                   </div>
                 </Col>

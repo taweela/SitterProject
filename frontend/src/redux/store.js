@@ -6,6 +6,7 @@ import { getMeAPI } from './api/getMeAPI';
 import userReducer from './api/userSlice';
 import { userAPI } from './api/userAPI';
 import { serviceAPI } from './api/serviceAPI';
+import { orderAPI } from './api/orderAPI';
 
 export const store = configureStore({
   reducer: {
@@ -13,10 +14,12 @@ export const store = configureStore({
     [getMeAPI.reducerPath]: getMeAPI.reducer,
     [userAPI.reducerPath]: userAPI.reducer,
     [serviceAPI.reducerPath]: serviceAPI.reducer,
+    [orderAPI.reducerPath]: orderAPI.reducer,
     userState: userReducer
   },
   devTools: process.env.NODE_ENV === 'development',
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware({}).concat([authAPI.middleware, getMeAPI.middleware, userAPI.middleware, serviceAPI.middleware])
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({}).concat([authAPI.middleware, getMeAPI.middleware, userAPI.middleware, serviceAPI.middleware, orderAPI.middleware])
 });
 
 export var RootState = store.getState();

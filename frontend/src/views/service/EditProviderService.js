@@ -28,7 +28,7 @@ const EditProviderService = () => {
 
   const [updateService, { isLoading, isError, error, isSuccess }] = useUpdateServiceMutation();
   const { data: service } = useGetServiceQuery(id);
-  console.log(service);
+
   const {
     register,
     handleSubmit,

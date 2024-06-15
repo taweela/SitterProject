@@ -1201,7 +1201,7 @@ ul.navbar-nav li.dropdown-user .dropdown-menu {
 .dropdown-item {
   display: block;
   width: 100%;
-  padding: 0.65rem 1.28rem;
+  padding: 0.5rem 1.28rem;
   clear: both;
   font-weight: 400;
   color: #6e6b7b;
@@ -1273,4 +1273,8 @@ ul.navbar-nav li.dropdown-user .dropdown-menu {
 .form-check-input {
   float: left;
   margin-left: -1.785rem;
+}
+
+.provider-service-card .item-options .btn-order {
+  margin-top: 1rem;
 }

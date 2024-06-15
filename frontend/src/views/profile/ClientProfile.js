@@ -20,7 +20,6 @@ const ClientProfile = () => {
   const { data: user, isLoading } = getMeAPI.endpoints.getMe.useQuery(null);
   const [uploadProfileAvatar, { isLoading: avatarIsLoading, isError, error, isSuccess }] = useUploadProfileAvatarMutation();
   const [avatarFile, setAvatarFile] = useState(null);
-  console.log(user, isLoading);
 
   useEffect(() => {
     if (user) {

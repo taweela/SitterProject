@@ -35,7 +35,6 @@ const Header = () => {
   const location = useLocation();
 
   const currentRoute = location.pathname;
-  console.log(user);
   useEffect(() => {
     if (isSuccess) {
       window.location.href = '/login';
@@ -129,7 +128,9 @@ const Header = () => {
                     </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/client/orders')}>Order</NavLink>
+                    <NavLink className={currentRoute.includes('client/orders') ? 'active' : ''} onClick={() => navigate('/client/orders')}>
+                      Order
+                    </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
                     <NavLink onClick={() => navigate('/client/message')}>Message</NavLink>

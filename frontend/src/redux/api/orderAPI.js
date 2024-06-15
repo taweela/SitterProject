@@ -4,10 +4,10 @@ import { getToken } from '../../utils/Utils';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
-export const serviceAPI = createApi({
-  reducerPath: 'serviceAPI',
+export const orderAPI = createApi({
+  reducerPath: 'orderAPI',
   baseQuery: fetchBaseQuery({
-    baseUrl: `${BASE_URL}/api/services`,
+    baseUrl: `${BASE_URL}/api/orders`,
     prepareHeaders: (headers) => {
       const accessToken = getToken();
       if (accessToken) {
@@ -16,9 +16,9 @@ export const serviceAPI = createApi({
       return headers;
     }
   }),
-  tagTypes: ['Services'],
+  tagTypes: ['Orders'],
   endpoints: (builder) => ({
-    getServices: builder.query({
+    getOrders: builder.query({
       query: (args) => {
         return {
           url: '/',
@@ -30,34 +30,34 @@ export const serviceAPI = createApi({
         if (result) {
           return [
             ...result.map(({ id }) => ({
-              type: 'Services',
+              type: 'Orders',
               id
             })),
-            { type: 'Services', id: 'LIST' }
+            { type: 'Orders', id: 'LIST' }
           ];
         } else {
-          return [{ type: 'Services', id: 'LIST' }];
+          return [{ type: 'Orders', id: 'LIST' }];
         }
       },
       transformResponse(results) {
-        return results.services;
+        return results.orders;
       }
     }),
-    getService: builder.query({
+    getOrder: builder.query({
       query(id) {
         return {
-          url: `/getService/${id}`,
+          url: `/getOrder/${id}`,
           credentials: 'include'
         };
       },
       providesTags: (result, error, id) => {
-        return [{ type: 'Services', id }];
+        return [{ type: 'Orders', id }];
       },
       transformResponse(result) {
         return result;
       }
     }),
-    createService: builder.mutation({
+    createOrder: builder.mutation({
       query(payload) {
         return {
           url: '/create',
@@ -66,22 +66,22 @@ export const serviceAPI = createApi({
           body: payload
         };
       },
-      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
-      transformResponse: (result) => result.service
+      invalidatesTags: [{ type: 'Orders', id: 'LIST' }],
+      transformResponse: (result) => result.order
     }),
-    updateService: builder.mutation({
-      query({ id, service }) {
+    updateOrder: builder.mutation({
+      query({ id, order }) {
         return {
           url: `/update/${id}`,
           method: 'PUT',
           credentials: 'include',
-          body: service
+          body: order
         };
       },
-      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
-      transformResponse: (result) => result.service
+      invalidatesTags: [{ type: 'Orders', id: 'LIST' }],
+      transformResponse: (result) => result.order
     }),
-    manageStatusService: builder.mutation({
+    manageStatusOrder: builder.mutation({
       query({ id, status }) {
         return {
           url: `/manageStatus/${id}`,
@@ -90,10 +90,10 @@ export const serviceAPI = createApi({
           body: status
         };
       },
-      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Orders', id: 'LIST' }],
       transformResponse: (result) => result
     }),
-    deleteService: builder.mutation({
+    deleteOrder: builder.mutation({
       query(id) {
         return {
           url: `/delete/${id}`,
@@ -101,16 +101,10 @@ export const serviceAPI = createApi({
           credentials: 'include'
         };
       },
-      invalidatesTags: [{ type: 'Services', id: 'LIST' }]
+      invalidatesTags: [{ type: 'Orders', id: 'LIST' }]
     })
   })
 });
 
-export const {
-  useGetServicesQuery,
-  useCreateServiceMutation,
-  useGetServiceQuery,
-  useUpdateServiceMutation,
-  useDeleteServiceMutation,
-  useManageStatusServiceMutation
-} = serviceAPI;
+export const { useGetOrderQuery, useCreateOrderMutation, useGetOrdersQuery, useUpdateOrderMutation, useDeleteOrderMutation, useManageStatusOrderMutation } =
+  orderAPI;

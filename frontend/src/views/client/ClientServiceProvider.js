@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { Heart, Search, Share2, Star } from 'react-feather';
+import { Aperture, Heart, Search, Share2, Star } from 'react-feather';
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
 import {
@@ -21,8 +21,10 @@ import {
 } from 'reactstrap';
 import SpinnerComponent from '../../components/SpinnerComponent';
 import { useGetProvidersQuery } from '../../redux/api/userAPI';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import userImg from '../../assets/images/user.png';
+import { useCreateOrderMutation } from '../../redux/api/orderAPI';
+import toast from 'react-hot-toast';
 
 const ClientServiceProvider = () => {
   const [searchItem, setSearchItem] = useState('');
@@ -30,7 +32,7 @@ const ClientServiceProvider = () => {
   const [price, setPrice] = useState();
   const [page, setPage] = useState(1);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  console.log(selectedTypes);
+  const [createOrder, { isLoading: orderLoading, isError, error, isSuccess }] = useCreateOrderMutation();
 
   const queryParams = {
     q: searchItem,
@@ -41,15 +43,38 @@ const ClientServiceProvider = () => {
     selectedTypes: selectedTypes
   };
   const { data: provider, isLoading } = useGetProvidersQuery(queryParams);
-  console.log(provider);
 
   const handleFilter = (q) => {
     setSearchItem(q);
   };
 
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">Order Requested successfully!</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+    if (isError) {
+      toast.error(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">{error.data.message}</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+  }, [orderLoading]);
+
   // ** Handles pagination
   const handlePageChange = (val) => {
-    console.log(val);
     if (val === 'next') {
       setPage(page + 1);
     } else if (val === 'prev') {
@@ -61,6 +86,13 @@ const ClientServiceProvider = () => {
 
   const handleFavourite = (id, val) => {
     console.log(id, val);
+  };
+
+  const handleOrder = (providerId) => {
+    const orderData = {
+      provider: providerId
+    };
+    createOrder(orderData);
   };
 
   const serviceTypes = [
@@ -134,13 +166,11 @@ const ClientServiceProvider = () => {
   const handleDistanceChange = (e) => {
     const selectedDistance = e.target.id == 'allDistance' ? null : e.target.id;
     setDistance(selectedDistance);
-    console.log(selectedDistance);
   };
 
   const handlePriceChange = (e) => {
     const selectedPrice = e.target.id == 'allPrice' ? null : e.target.id;
     setPrice(selectedPrice);
-    console.log(selectedPrice);
   };
 
   const handleServiceTypeChange = (e) => {
@@ -153,7 +183,6 @@ const ClientServiceProvider = () => {
       // Remove type from selected array
       setSelectedTypes(selectedTypes.filter((t) => t !== type));
     }
-    console.log(checked, type, selectedTypes);
   };
 
   return (
@@ -348,9 +377,13 @@ const ClientServiceProvider = () => {
                             />
                             <span>Favourite</span>
                           </Button>
-                          <Button color="primary" className="btn-contact move-contact">
+                          <Button color="primary" className="btn-contact" onClick={() => handleOrder(item.user._id)}>
                             <Share2 className="me-50" size={18} />
                             <span>Contact</span>
+                          </Button>
+                          <Button color="danger" className="btn-order" onClick={() => handleOrder(item.user._id)}>
+                            <Aperture className="me-50" size={18} />
+                            <span>Order</span>
                           </Button>
                         </div>
                       </Card>

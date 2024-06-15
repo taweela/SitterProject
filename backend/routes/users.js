@@ -61,7 +61,6 @@ router.get('/serviceProvider', verifyToken(['admin', 'client']), async (req, res
         : {};
     const searchQuery = typeof req.query.q !== 'undefined' ? req.query.q : '';
     const user = await User.findById(req.user._id).select('-password -__v');
-    console.log(typeof req.query.price, req.query.price)
     const rateFilter = req.query.price && req.query.price !== 'null'
         ? {
             rate: {
