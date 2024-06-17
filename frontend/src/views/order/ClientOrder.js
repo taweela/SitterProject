@@ -9,9 +9,6 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  Input,
-  InputGroup,
-  InputGroupText,
   Modal,
   ModalBody,
   ModalFooter,
@@ -22,7 +19,7 @@ import {
 import DataTable from 'react-data-table-component';
 import { Check, CheckSquare, ChevronDown, MoreVertical, Search, Trash2, X } from 'react-feather';
 import { useDeleteOrderMutation, useGetOrdersQuery, useManageStatusOrderMutation } from '../../redux/api/orderAPI';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
@@ -108,19 +105,16 @@ const ClientOrder = () => {
   const columns = () => [
     {
       name: 'Order Number',
-      maxwidth: '100px',
-      selector: (row) => `${row.orderNumber}`,
+      cell: (row) => <Link to={`/client/orders/detail/${row.orderNumber}`}>{`#${row.orderNumber}`}</Link>,
       sortable: true
     },
     {
       name: 'Client',
-      maxwidth: '100px',
       selector: (row) => `${row.client.firstName} ${row.client.lastName}`,
       sortable: true
     },
     {
       name: 'Service Provider',
-      maxwidth: '100px',
       selector: (row) => `${row.provider.firstName} ${row.provider.lastName}`,
       sortable: true
     },

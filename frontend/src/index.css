@@ -1278,3 +1278,8 @@ ul.navbar-nav li.dropdown-user .dropdown-menu {
 .provider-service-card .item-options .btn-order {
   margin-top: 1rem;
 }
+
+a {
+  color: #fc345c;
+  text-decoration: none;
+}

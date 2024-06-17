@@ -57,6 +57,20 @@ export const orderAPI = createApi({
         return result;
       }
     }),
+    getOrderNumber: builder.query({
+      query(orderNumber) {
+        return {
+          url: `/getOrderNumber/${orderNumber}`,
+          credentials: 'include'
+        };
+      },
+      providesTags: (result, error, id) => {
+        return [{ type: 'Orders', id }];
+      },
+      transformResponse(result) {
+        return result;
+      }
+    }),
     createOrder: builder.mutation({
       query(payload) {
         return {
@@ -106,5 +120,12 @@ export const orderAPI = createApi({
   })
 });
 
-export const { useGetOrderQuery, useCreateOrderMutation, useGetOrdersQuery, useUpdateOrderMutation, useDeleteOrderMutation, useManageStatusOrderMutation } =
-  orderAPI;
+export const {
+  useGetOrderQuery,
+  useCreateOrderMutation,
+  useGetOrdersQuery,
+  useUpdateOrderMutation,
+  useDeleteOrderMutation,
+  useManageStatusOrderMutation,
+  useGetOrderNumberQuery
+} = orderAPI;

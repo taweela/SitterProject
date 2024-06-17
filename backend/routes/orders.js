@@ -25,6 +25,24 @@ router.get('/', verifyToken(['client', 'serviceProvider']), async (req, res) => 
     });
 });
 
+router.get('/getOrderNumber/:orderNumber', verifyToken(['client', 'serviceProvider']), async (req, res) => {
+    const filterParams = {
+        $and: [
+          { orderNumber: req.params.orderNumber },
+        ],
+    };
+    const order = await Order.findOne(filterParams).populate({
+        path: 'client'
+    }).populate({
+        path: 'provider'
+    }).select("-__v");
+
+    if (!order) {
+        return res.status(400).send('No order found');
+    }
+    return res.send(order);
+});
+
 router.post('/create', verifyToken(['client']), async (req, res) => {
     const { provider } = req.body;
     console.log(req.body)

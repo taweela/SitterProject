@@ -25,6 +25,7 @@ import ClientProfile from './views/profile/ClientProfile';
 import ProviderProfile from './views/profile/ProviderProfile';
 import ClientMessage from './views/messages/ClientMessage';
 import ClientOrder from './views/order/ClientOrder';
+import ClientOrderDetail from './views/order/ClientOrderDetail';
 
 const App = () => {
   return (
@@ -45,6 +46,7 @@ const App = () => {
             <Route path="client/service-providers" element={<ClientServiceProvider />} />
             <Route path="client/service-providers/view/:id" element={<ClientSeriveProviderView />} />
             <Route path="client/orders" element={<ClientOrder />} />
+            <Route path="client/orders/detail/:orderNumber" element={<ClientOrderDetail />} />
             <Route path="client/profile" element={<ClientProfile />} />
             <Route path="client/message" element={<ClientMessage />} />
           </Route>

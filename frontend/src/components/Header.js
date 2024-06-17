@@ -182,8 +182,12 @@ const Header = () => {
                   </NavItem>
                   <NotificationDropdown />
                   <UncontrolledDropdown nav inNavbar>
-                    <DropdownToggle nav caret>
-                      <img src={user.avatar ? user.avatar : userImg} alt="Service Provider" className="user-img" />
+                    <DropdownToggle href="/" tag="a" className="nav-link dropdown-user-link" onClick={(e) => e.preventDefault()}>
+                      <div className="user-nav d-sm-flex d-none">
+                        <span className="user-name fw-bold">{(user && user['firstName']) || ''}</span>
+                        <span className="user-status">{(user && user.role) || 'Admin'}</span>
+                      </div>
+                      <Avatar img={user.avatar ? user.avatar : userImg} imgHeight="40" imgWidth="40" status="online" />
                     </DropdownToggle>
                     <DropdownMenu end>
                       <DropdownItem onClick={() => navigate('/service-provider/profile')}>Profile</DropdownItem>
