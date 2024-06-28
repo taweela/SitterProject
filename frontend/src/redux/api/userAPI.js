@@ -94,6 +94,18 @@ export const userAPI = createApi({
         return result;
       }
     }),
+    manageStatusUser: builder.mutation({
+      query({ id, status }) {
+        return {
+          url: `/manageStatus/${id}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: status
+        };
+      },
+      invalidatesTags: [{ type: 'Users', id: 'LIST' }],
+      transformResponse: (result) => result
+    }),
     deleteUser: builder.mutation({
       query(id) {
         return {
@@ -107,4 +119,4 @@ export const userAPI = createApi({
   })
 });
 
-export const { useGetUsersQuery, useGetUserQuery, useGetProvidersQuery, useUpdateUserMutation, useDeleteUserMutation } = userAPI;
+export const { useGetUsersQuery, useGetUserQuery, useGetProvidersQuery, useUpdateUserMutation, useDeleteUserMutation, useManageStatusUserMutation } = userAPI;

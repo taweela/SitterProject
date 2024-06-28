@@ -17,9 +17,9 @@ import {
   UncontrolledDropdown
 } from 'reactstrap';
 import DataTable from 'react-data-table-component';
-import { Check, CheckSquare, ChevronDown, MoreVertical, Search, Trash2, X } from 'react-feather';
+import { Check, ChevronDown, MoreVertical, Trash2, X } from 'react-feather';
 import { useDeleteOrderMutation, useGetOrdersQuery, useManageStatusOrderMutation } from '../../redux/api/orderAPI';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
@@ -69,7 +69,6 @@ const ClientOrder = () => {
     status: currentStatus.value
   };
   const paginationRowsPerPageOptions = [15, 30, 50, 100];
-  const navigate = useNavigate();
   const [modalVisibility, setModalVisibility] = useState(false);
   const [manageStatus, { isLoading, isError, error, isSuccess }] = useManageStatusOrderMutation();
 
@@ -106,21 +105,25 @@ const ClientOrder = () => {
     {
       name: 'Order Number',
       cell: (row) => <Link to={`/client/orders/detail/${row.orderNumber}`}>{`#${row.orderNumber}`}</Link>,
-      sortable: true
+      sortable: true,
+      maxwidth: '100px'
     },
     {
       name: 'Client',
-      selector: (row) => `${row.client.firstName} ${row.client.lastName}`,
-      sortable: true
+      maxwidth: '100px',
+      sortable: true,
+      selector: (row) => `${row.client?.firstName} ${row.client?.lastName}`
     },
     {
       name: 'Service Provider',
-      selector: (row) => `${row.provider.firstName} ${row.provider.lastName}`,
-      sortable: true
+      maxwidth: '100px',
+      sortable: true,
+      selector: (row) => `${row.provider?.firstName} ${row.provider?.lastName}`
     },
     {
       name: 'Status',
-      cell: (row) => renderStatus(row)
+      cell: (row) => renderStatus(row),
+      sortable: true
     },
     {
       name: 'Actions',
@@ -150,12 +153,7 @@ const ClientOrder = () => {
                 </UncontrolledDropdown>
                 <Modal isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
                   <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Confirm Delete?</ModalHeader>
-                  <ModalBody>
-                    Are you sure you want to delete?
-                    <div>
-                      <strong>{row.email}</strong>
-                    </div>
-                  </ModalBody>
+                  <ModalBody>Are you sure you want to delete?</ModalBody>
                   <ModalFooter className="justify-content-start">
                     <Button color="primary" onClick={() => handleDeleteOrder(row._id)}>
                       Delete

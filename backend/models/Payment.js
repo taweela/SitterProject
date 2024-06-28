@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 
-const reviewSchema = new mongoose.Schema({
-    description: {
+const paymentSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        enum: ['fixed', 'hourly'],
+        default: '',
+    },
+    amount: {
         type: String,
         required: true
     },
@@ -13,6 +18,10 @@ const reviewSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    order: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order',
+    },
 }, {
     timestamps: {
         createdAt: 'createdAt',
@@ -20,4 +29,4 @@ const reviewSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Review', reviewSchema);
+module.exports = mongoose.model('Payment', paymentSchema);

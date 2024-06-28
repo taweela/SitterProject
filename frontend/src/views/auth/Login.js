@@ -31,7 +31,6 @@ const Login = () => {
     if (isSuccess) {
       const user = getUserData();
       const userInfo = JSON.parse(user);
-      console.log(userInfo);
       toast(
         (t) => (
           <div className="d-flex">

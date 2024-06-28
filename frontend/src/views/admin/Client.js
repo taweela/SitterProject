@@ -128,15 +128,10 @@ export const columns = () => [
               </UncontrolledDropdown>
               <Modal isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
                 <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Confirm Delete?</ModalHeader>
-                <ModalBody>
-                  Are you sure you want to delete?
-                  <div>
-                    <strong>{row.email}</strong>
-                  </div>
-                </ModalBody>
+                <ModalBody>Are you sure you want to delete?</ModalBody>
                 <ModalFooter className="justify-content-start">
-                  <Button color="primary" onClick={() => handleDeleteUser(row._id)}>
-                    Yes, Please Delete
+                  <Button color="danger" onClick={() => handleDeleteUser(row._id)}>
+                    Yes
                   </Button>
                   <Button color="secondary" onClick={() => setModalVisibility(!modalVisibility)} outline>
                     No

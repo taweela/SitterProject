@@ -1,15 +1,23 @@
 /* eslint-disable no-unused-vars */
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Col, Container, Row } from 'reactstrap';
 import ProviderSidebarLeft from './providerChat/ProviderSidebarLeft';
 import ProviderChat from './providerChat/ProviderChat';
 import classnames from 'classnames';
+import { useGetContactsQuery } from '../../redux/api/contactAPI';
 
 const ProviderMessage = () => {
   const [user, setUser] = useState({});
   const [sidebar, setSidebar] = useState(false);
   const [userSidebarLeft, setUserSidebarLeft] = useState(false);
   const [userSidebarRight, setUserSidebarRight] = useState(false);
+  const { data: chats, refetch } = useGetContactsQuery();
+  const [selectedContact, setSelectedContact] = useState({
+    contactId: null
+  });
+  const [selectedUser, setSelectedUser] = useState({
+    client: null
+  });
 
   // ** Sidebar & overlay toggle functions
   const handleSidebar = () => setSidebar(!sidebar);
@@ -21,6 +29,10 @@ const ProviderMessage = () => {
     setUserSidebarRight(false);
     setUserSidebarLeft(false);
   };
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   // ** Set user function for Right Sidebar
   const handleUser = (obj) => setUser(obj);
@@ -34,6 +46,10 @@ const ProviderMessage = () => {
             handleSidebar={handleSidebar}
             userSidebarLeft={userSidebarLeft}
             handleUserSidebarLeft={handleUserSidebarLeft}
+            selectedUser={selectedUser}
+            setSelectedUser={setSelectedUser}
+            chats={chats}
+            setSelectedContact={setSelectedContact}
           />
           <div className="content-right">
             <div className="content-wrapper">
@@ -48,6 +64,10 @@ const ProviderMessage = () => {
                   handleSidebar={handleSidebar}
                   userSidebarLeft={userSidebarLeft}
                   handleUserSidebarRight={handleUserSidebarRight}
+                  setSelectedContact={setSelectedContact}
+                  selectedUser={selectedUser}
+                  setSelectedUser={setSelectedUser}
+                  selectedContact={selectedContact}
                 />
               </div>
             </div>

@@ -13,8 +13,10 @@ import { useAppSelector } from '../../../redux/store';
 import userImg from '../../../assets/images/user.png';
 import io from 'socket.io-client';
 
+const socket = io('http://localhost:3008');
+
 /* eslint-disable no-unused-vars */
-const ProviderChat = (props) => {
+const ClientChat = (props) => {
   const { handleUser, handleUserSidebarRight, handleSidebar, userSidebarLeft, selectedContact, selectedUser } = props;
   const [msg, setMsg] = useState('');
   const user = useAppSelector((state) => state.userState.user);
@@ -38,11 +40,24 @@ const ProviderChat = (props) => {
     }
   }, [selectedUserChats]);
 
+  useEffect(() => {
+    socket.on('chat message', (msg) => {
+      console.log(msg, '----');
+    });
+  }, []);
+
   // ** Sends New Msg
   const handleSendMsg = (e) => {
     e.preventDefault();
-    console.log(msg, 'ddddddddddddddddddd');
     if (msg.trim().length) {
+      const message = {
+        room: selectedContact.contactId,
+        text: msg,
+        sender: user._id,
+        receiver: selectedUser?.provider._id,
+        contact: selectedContact.contactId
+      };
+      socket.emit('chat message', message);
       setMsg('');
     }
   };
@@ -51,30 +66,30 @@ const ProviderChat = (props) => {
   const formattedChatData = () => {
     let chatLog = [];
     if (selectedUserChats.chats) {
-      chatLog = selectedUserChats.chats.chat;
+      chatLog = selectedUserChats.chats;
     }
-
+    console.log(chatLog, '---------');
     const formattedChatLog = [];
-    let chatMessageSenderId = chatLog[0] ? chatLog[0].senderId : undefined;
+    let chatMessageSenderId = chatLog[0] ? chatLog[0].sender._id : undefined;
     let msgGroup = {
       senderId: chatMessageSenderId,
       messages: []
     };
     chatLog.forEach((msg, index) => {
-      if (chatMessageSenderId === msg.senderId) {
+      if (chatMessageSenderId === msg.sender._id) {
         msgGroup.messages.push({
-          msg: msg.message,
-          time: msg.time
+          msg: msg.content,
+          time: msg.createdAt
         });
       } else {
-        chatMessageSenderId = msg.senderId;
+        chatMessageSenderId = msg.sender._id;
         formattedChatLog.push(msgGroup);
         msgGroup = {
-          senderId: msg.senderId,
+          senderId: msg.sender._id,
           messages: [
             {
-              msg: msg.message,
-              time: msg.time
+              msg: msg.content,
+              time: msg.createdAt
             }
           ]
         };
@@ -98,11 +113,11 @@ const ProviderChat = (props) => {
         <div
           key={index}
           className={classnames('chat', {
-            'chat-left': item.senderId !== 11
+            'chat-left': item.senderId !== user._id
           })}>
-          {/* <div className="chat-avatar">
-            <Avatar imgWidth={36} imgHeight={36} className="box-shadow-1 cursor-pointer" img={item.senderId === 11 ? user.avatar : selectedUserChats.avatar} />
-          </div> */}
+          <div className="chat-avatar">
+            <Avatar imgWidth={36} imgHeight={36} className="box-shadow-1 cursor-pointer" img={item.senderId === user._id ? user.avatar : user.avatar} />
+          </div>
 
           <div className="chat-body">
             {item.messages.map((chat) => (
@@ -120,7 +135,7 @@ const ProviderChat = (props) => {
   const ChatWrapper = selectedUserChats && Object.keys(selectedUserChats).length && selectedUserChats.chats ? PerfectScrollbar : 'div';
   return (
     <div className="chat-app-window">
-      <div className={classnames('start-chat-area', { 'd-none': (selectedUserChats && selectedUserChats.chats.length > 0) || selectedUser.client })}>
+      <div className={classnames('start-chat-area', { 'd-none': (selectedUserChats && selectedUserChats.chats.length > 0) || selectedUser.provider })}>
         <div className="start-chat-icon mb-1">
           <MessageSquare />
         </div>
@@ -129,7 +144,7 @@ const ProviderChat = (props) => {
         </h4>
       </div>
       {selectedUser && Object.keys(selectedUser).length ? (
-        <div className={classnames('active-chat', { 'd-none': selectedUser.client === null })}>
+        <div className={classnames('active-chat', { 'd-none': selectedUser.provider === null })}>
           <div className="chat-navbar">
             <div className="chat-header">
               <div className="d-flex align-items-center">
@@ -139,19 +154,19 @@ const ProviderChat = (props) => {
                 <Avatar
                   imgHeight="36"
                   imgWidth="36"
-                  img={selectedUser.client?.avatar ? selectedUser.client.avatar : userImg}
+                  img={selectedUser.provider?.avatar ? selectedUser.provider.avatar : userImg}
                   // status={selectedUser?.provider?.status}
                   className="avatar-border user-profile-toggle m-0 me-3"
                 />
                 <h6 className="mb-0">
-                  {selectedUser.client?.firstName} {selectedUser.client?.lastName}
+                  {selectedUser.provider?.firstName} {selectedUser.provider?.lastName}
                 </h6>
               </div>
             </div>
           </div>
 
           <ChatWrapper ref={chatArea} className="user-chats" options={{ wheelPropagation: false }}>
-            {selectedUserChats && selectedUserChats.chat ? <div className="chats">{renderChats()}</div> : null}
+            {selectedUserChats && selectedUserChats.chats ? <div className="chats">{renderChats()}</div> : null}
           </ChatWrapper>
 
           <Form className="chat-app-form" onSubmit={(e) => handleSendMsg(e)}>
@@ -178,4 +193,4 @@ const ProviderChat = (props) => {
   );
 };
 
-export default ProviderChat;
+export default ClientChat;

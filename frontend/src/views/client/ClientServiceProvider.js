@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Aperture, Heart, Search, Share2, Star } from 'react-feather';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import classnames from 'classnames';
 import {
   Badge,
@@ -10,10 +10,16 @@ import {
   CardText,
   Col,
   Container,
+  Form,
+  FormGroup,
   Input,
   InputGroup,
   InputGroupText,
   Label,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Pagination,
   PaginationItem,
   PaginationLink,
@@ -25,14 +31,27 @@ import { useEffect, useState } from 'react';
 import userImg from '../../assets/images/user.png';
 import { useCreateOrderMutation } from '../../redux/api/orderAPI';
 import toast from 'react-hot-toast';
+import { useForm } from 'react-hook-form';
+import { useCreateCardMutation, useGetCardQuery } from '../../redux/api/cardAPI';
+import { useCreateContactMutation } from '../../redux/api/contactAPI';
 
 const ClientServiceProvider = () => {
   const [searchItem, setSearchItem] = useState('');
+  const navigate = useNavigate();
   const [distance, setDistance] = useState();
+  const [modalVisibilityCard, setModalVisibilityCard] = useState(false);
   const [price, setPrice] = useState();
   const [page, setPage] = useState(1);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [createOrder, { isLoading: orderLoading, isError, error, isSuccess }] = useCreateOrderMutation();
+  const { data: card, refetch } = useGetCardQuery();
+  const [createCard] = useCreateCardMutation();
+  const [createContact] = useCreateContactMutation();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm();
 
   const queryParams = {
     q: searchItem,
@@ -88,11 +107,15 @@ const ClientServiceProvider = () => {
     console.log(id, val);
   };
 
-  const handleOrder = (providerId) => {
+  const handleOrder = async (providerId) => {
     const orderData = {
       provider: providerId
     };
-    createOrder(orderData);
+    if (card.status === 'exist') {
+      await createOrder(orderData);
+    } else {
+      setModalVisibilityCard(!modalVisibilityCard);
+    }
   };
 
   const serviceTypes = [
@@ -183,6 +206,32 @@ const ClientServiceProvider = () => {
       // Remove type from selected array
       setSelectedTypes(selectedTypes.filter((t) => t !== type));
     }
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      await createCard(data); // Wait for the card creation to complete
+      setModalVisibilityCard(!modalVisibilityCard);
+      refetch(); // Refetch the card data after creating a new card
+    } catch (error) {
+      console.error('Error creating card:', error);
+    }
+  };
+
+  const handleClose = async () => {
+    setModalVisibilityCard(!modalVisibilityCard);
+  };
+
+  const handleSaveButtonClick = () => {
+    handleSubmit(onSubmit)();
+  };
+
+  const handleContact = async (providerId) => {
+    const contactData = {
+      provider: providerId
+    };
+    await createContact(contactData);
+    navigate('/client/message');
   };
 
   return (
@@ -377,7 +426,7 @@ const ClientServiceProvider = () => {
                             />
                             <span>Favourite</span>
                           </Button>
-                          <Button color="primary" className="btn-contact" onClick={() => handleOrder(item.user._id)}>
+                          <Button color="primary" className="btn-contact" onClick={() => handleContact(item.user._id)}>
                             <Share2 className="me-50" size={18} />
                             <span>Contact</span>
                           </Button>
@@ -410,6 +459,72 @@ const ClientServiceProvider = () => {
             </Row>
           </Col>
         </Row>
+        <Modal isOpen={modalVisibilityCard}>
+          <ModalHeader>Card Information</ModalHeader>
+          <ModalBody>
+            <Form onSubmit={handleSubmit(onSubmit)}>
+              <FormGroup>
+                <Label>Card Number</Label>
+                <input
+                  className={`form-control ${errors.cardNumber ? 'is-invalid' : ''}`}
+                  type="text"
+                  id="cardNumber"
+                  placeholder="Card Number"
+                  {...register('cardNumber', {
+                    required: 'Card Number is required.',
+                    pattern: {
+                      value: /^\d{16}$/,
+                      message: 'Please enter a valid 16-digit card number.'
+                    }
+                  })}
+                />
+                {errors.cardNumber && <span className="text-danger">{errors.cardNumber.message}</span>}
+              </FormGroup>
+              <FormGroup>
+                <Label>Expiration Date</Label>
+                <input
+                  className={`form-control ${errors.expiration_date ? 'is-invalid' : ''}`}
+                  type="text"
+                  id="expiration_date"
+                  placeholder="MM/YY"
+                  {...register('expiration_date', {
+                    required: 'Expiration Date is required.',
+                    pattern: {
+                      value: /^(0[1-9]|1[0-2])\/\d{2}$/,
+                      message: 'Please enter a valid MM/YY format.'
+                    }
+                  })}
+                />
+                {errors.expiration_date && <span className="text-danger">{errors.expiration_date.message}</span>}
+              </FormGroup>
+              <FormGroup>
+                <Label>CVC</Label>
+                <input
+                  className={`form-control ${errors.cvc ? 'is-invalid' : ''}`}
+                  type="text"
+                  id="cvc"
+                  placeholder="CVC"
+                  {...register('cvc', {
+                    required: 'CVC is required.',
+                    pattern: {
+                      value: /^\d{3}$/,
+                      message: 'Please enter a valid 3-digit CVC.'
+                    }
+                  })}
+                />
+                {errors.cvc && <span className="text-danger">{errors.cvc.message}</span>}
+              </FormGroup>
+            </Form>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" onClick={handleSaveButtonClick}>
+              Save
+            </Button>
+            <Button color="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Modal>
       </Container>
     </div>
   );

@@ -159,14 +159,6 @@ const ServiceProviderRegister = () => {
                   onPlaceSelected={(place) => {
                     clearErrors('address');
                     setAddressObj(place);
-                    const addressComponents = place.address_components;
-                    if (addressComponents) {
-                      const currencyObj = addressComponents.find((component) => component.types.includes('currency'));
-                      if (currencyObj) {
-                        const currency = currencyObj.short_name;
-                        console.log('Currency:', currency);
-                      }
-                    }
                   }}
                   options={{
                     types: ['address']

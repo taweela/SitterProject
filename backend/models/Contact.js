@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
-const reviewSchema = new mongoose.Schema({
-    description: {
-        type: String,
-        required: true
-    },
+const contactSchema = new mongoose.Schema({
     client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -20,4 +16,4 @@ const reviewSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Review', reviewSchema);
+module.exports = mongoose.model('Contact', contactSchema);

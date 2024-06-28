@@ -8,7 +8,9 @@ import { getDateFormat } from '../../utils/Utils';
 import { getMeAPI, useUploadProfileAvatarMutation } from '../../redux/api/getMeAPI';
 import classnames from 'classnames';
 import { useEffect, useState } from 'react';
-import { Edit, Edit2 } from 'react-feather';
+import { Edit2 } from 'react-feather';
+import { useUpdateUserMutation } from '../../redux/api/userAPI';
+import toast from 'react-hot-toast';
 
 const ClientProfile = () => {
   const {
@@ -18,7 +20,8 @@ const ClientProfile = () => {
     formState: { errors }
   } = useForm();
   const { data: user, isLoading } = getMeAPI.endpoints.getMe.useQuery(null);
-  const [uploadProfileAvatar, { isLoading: avatarIsLoading, isError, error, isSuccess }] = useUploadProfileAvatarMutation();
+  const [uploadProfileAvatar] = useUploadProfileAvatarMutation();
+  const [updateUser, { isLoading: userLoading, isSuccess, error, isError }] = useUpdateUserMutation();
   const [avatarFile, setAvatarFile] = useState(null);
 
   useEffect(() => {
@@ -31,13 +34,44 @@ const ClientProfile = () => {
     }
   }, [user]);
 
-  const onSubmit = (data) => {};
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">Profile updated successfully</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+
+    if (isError) {
+      toast.error(
+        <div className="d-flex align-items-center">
+          <span className="toast-title">{error.data}</span>
+        </div>,
+        {
+          duration: 4000,
+          position: 'top-right'
+        }
+      );
+    }
+  }, [userLoading]);
+
+  const onSubmit = (data) => {
+    if (avatarFile) {
+      data.avatar = avatarFile;
+    }
+    updateUser({ id: user._id, user: data });
+  };
   const handleAvatar = () => {
     const fileInput = document.getElementById('updateAvatar');
     fileInput.click();
   };
 
-  const manageAvatar = (e) => {
+  const manageAvatar = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -46,7 +80,9 @@ const ClientProfile = () => {
       };
       reader.readAsDataURL(file);
 
-      uploadProfileAvatar(file);
+      const result = await uploadProfileAvatar(file);
+      const avatarData = result.data.updateAvatar.avatar;
+      setAvatarFile(avatarData);
     }
   };
 

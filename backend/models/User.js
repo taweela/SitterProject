@@ -58,7 +58,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
-
+    experience: {
+        type: String,
+    },
     lastLogin: {
         type: Date,
     },

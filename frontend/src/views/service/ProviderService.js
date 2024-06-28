@@ -6,13 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Badge,
   Button,
-  Card,
-  CardBody,
   Col,
   Container,
-  Input,
-  InputGroup,
-  InputGroupText,
   Row,
   UncontrolledDropdown,
   DropdownToggle,
@@ -23,16 +18,8 @@ import {
   ModalBody,
   ModalFooter
 } from 'reactstrap';
-import { ChevronDown, MoreVertical, Archive, Search, Trash2, Plus, Edit, Activity, WifiOff } from 'react-feather';
+import { ChevronDown, MoreVertical, Trash2, Plus, Edit, Activity } from 'react-feather';
 import toast from 'react-hot-toast';
-
-const renderRole = (row) => (
-  <span className="text-truncate text-capitalize align-middle">
-    <Badge color="info" className="px-2 py-1" pill>
-      {row.role}
-    </Badge>
-  </span>
-);
 
 const renderStatus = (row) => {
   const color = row.status === 'active' ? 'light-success' : row.status === 'disabled' ? 'light-info' : 'light-danger';
@@ -50,7 +37,6 @@ export const columns = () => [
     name: 'Title',
     sortable: true,
     minwidth: '350px',
-    sortactive: true,
     cell: ({ title }) => title,
     selector: (row) => row.title
   },
@@ -171,15 +157,10 @@ export const columns = () => [
               </UncontrolledDropdown>
               <Modal isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
                 <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Confirm Delete?</ModalHeader>
-                <ModalBody>
-                  Are you sure you want to delete?
-                  <div>
-                    <strong>{row.email}</strong>
-                  </div>
-                </ModalBody>
+                <ModalBody>Are you sure you want to delete?</ModalBody>
                 <ModalFooter className="justify-content-start">
                   <Button color="danger" onClick={() => handleDeleteService(row._id)}>
-                    Yes, Please Delete
+                    Yes
                   </Button>
                   <Button color="secondary" onClick={() => setModalVisibility(!modalVisibility)} outline>
                     No

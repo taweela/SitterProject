@@ -51,6 +51,7 @@ router.post('/register', async (req, res) => {
       address: req.body.address.formatted_address,
       latitude: lat,
       longitude: lng,
+      status: 'active'
     }
   }
   const user = new User(userTemp);
@@ -84,6 +85,12 @@ router.post('/login', async (req, res) => {
   const tokenExpiry = req.body.remember ? '60d' : authConfig.expireTime;
   const validPass = await bcrypt.compare(req.body.password, user.password);
   if (!validPass) return res.status(400).send({ message: 'Email or password not found!' });
+  if (user.status == 'pending') {
+    return res.status(400).send({ message: 'Your account is pending, please wait.' });
+  }
+  if (user.status == 'declined') {
+    return res.status(400).send({ message: 'Your account is declined' });
+  }
 
   // validation passed, create tokens
   const accessToken = jwt.sign({ _id: user._id }, process.env.AUTH_TOKEN_SECRET, { expiresIn: tokenExpiry });

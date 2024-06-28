@@ -27,20 +27,46 @@ router.get('/', verifyToken(['client', 'serviceProvider']), async (req, res) => 
 
 router.get('/getOrderNumber/:orderNumber', verifyToken(['client', 'serviceProvider']), async (req, res) => {
     const filterParams = {
-        $and: [
-          { orderNumber: req.params.orderNumber },
-        ],
+        orderNumber: req.params.orderNumber
     };
-    const order = await Order.findOne(filterParams).populate({
-        path: 'client'
-    }).populate({
-        path: 'provider'
-    }).select("-__v");
-
-    if (!order) {
+    const order = await Order.aggregate([
+        { $match: { orderNumber: parseFloat(req.params.orderNumber)} },
+        {
+            $lookup: {
+                from: "users",
+                localField: "client",
+                foreignField: "_id",
+                as: "client"
+            }
+        },
+        { $unwind: "$client" },
+        {
+            $lookup: {
+                from: "users",
+                localField: "provider",
+                foreignField: "_id",
+                as: "provider"
+            }
+        },
+        { $unwind: "$provider" },
+        {
+            $lookup: {
+                from: "payments", // Collection name for Payment model
+                localField: "_id",
+                foreignField: "order",
+                as: "payments"
+            }
+        },
+        {
+            $project: {
+                __v: 0,
+            }
+        }
+    ])
+    if (!order[0]) {
         return res.status(400).send('No order found');
     }
-    return res.send(order);
+    return res.send(order[0]);
 });
 
 router.post('/create', verifyToken(['client']), async (req, res) => {

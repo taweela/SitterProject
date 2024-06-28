@@ -1,13 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Card, CardBody, Col, Row } from 'reactstrap';
-import { Link } from 'react-router-dom';
 import logo1Img from '../../assets/images/logo-1.png';
 
 const Register = () => {
-  const onSubmit = (data) => {
-    // loginUser(data);
-  };
-
   return (
     <div className="auth-wrapper auth-v1 px-2 auth-background">
       <div className="auth-inner py-2">

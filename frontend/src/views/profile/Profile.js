@@ -5,11 +5,12 @@ import { useParams } from 'react-router-dom';
 import { useGetUserQuery } from '../../redux/api/userAPI';
 import SpinnerComponent from '../../components/SpinnerComponent';
 import { getDateFormat } from '../../utils/Utils';
+import { useGetReviewsQuery } from '../../redux/api/reviewAPI';
 
 const Profile = () => {
   const { id } = useParams();
   const { data: user, isLoading } = useGetUserQuery(id);
-  console.log(user, isLoading);
+  const { data: reviews } = useGetReviewsQuery(id);
 
   return (
     <div className="main-view">
@@ -49,31 +50,35 @@ const Profile = () => {
                   <div>
                     <div className="mt-2">
                       <h5 className="mb-2">About:</h5>
-                      <p className="card-text">Tart I love sugar plum I love oat cake. Sweet ⭐️ roll caramels I love jujubes. Topping cake wafer.</p>
+                      <p className="card-text">{user.description}</p>
                     </div>
                     <hr />
                     <div className="mt-3">
-                      <h5 className="mb-2">Experiences:</h5>
-                      <p className="card-text">November 15, 2015</p>
+                      <h5 className="mb-2">Experience:</h5>
+                      <p className="card-text">{user.experience} years</p>
                     </div>
                     <hr />
                     <div className="mt-3">
                       <h5 className="mb-3">Reviews:</h5>
-                      <div className="my-2">
-                        <div className="d-flex justify-content-start align-items-center mb-1">
-                          <div className="avatar me-2">
-                            <img src={userImg} alt="avatar img" height="50" width="50" />
-                          </div>
-                          <div className="profile-user-info">
-                            <h6 className="mb-0">Leeanna Alvord</h6>
-                            <small className="text-muted">12 Dec 2018 at 1:16 AM</small>
-                          </div>
-                        </div>
-                        <p className="card-text">
-                          Wonderful Machine· A well-written bio allows viewers to get to know a photographer beyond the work. This can make the difference when
-                          presenting to clients who are looking for the perfect fit.
-                        </p>
-                      </div>
+                      {reviews &&
+                        reviews.map((review, index) => {
+                          return (
+                            <div key={index} className="my-2">
+                              <div className="d-flex justify-content-start align-items-center mb-1">
+                                <div className="avatar me-2">
+                                  <img src={review.client?.avatar ? review.client?.avatar : userImg} alt="avatar img" height="50" width="50" />
+                                </div>
+                                <div className="profile-user-info">
+                                  <h6 className="mb-0">
+                                    {review.client?.firstName} {review.client?.lastName}
+                                  </h6>
+                                  <small className="text-muted">{getDateFormat(review.createdAt)}</small>
+                                </div>
+                              </div>
+                              <p className="card-text">{review.description}</p>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 </Col>

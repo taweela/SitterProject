@@ -9,14 +9,15 @@ import { CardText, InputGroup, InputGroupText, Badge, Input, Button, Label } fro
 import userImg from '../../../assets/images/user.png';
 import { useState } from 'react';
 import { useAppSelector } from '../../../redux/store';
-import { useGetContactsQuery } from '../../../redux/api/contactAPI';
 import { formatDate } from '../../../utils/Utils';
+import io from 'socket.io-client';
 
-const ProviderSidebarLeft = (props) => {
+const socket = io('http://localhost:3008');
+
+const ClientSidebarLeft = (props) => {
   // ** Props & Store
-  const { sidebar, handleSidebar, userSidebarLeft, handleUserSidebarLeft } = props;
+  const { sidebar, handleSidebar, userSidebarLeft, handleUserSidebarLeft, chats } = props;
   const user = useAppSelector((state) => state.userState.user);
-  const { data: chats } = useGetContactsQuery();
 
   // ** State
   const [query, setQuery] = useState('');
@@ -26,12 +27,13 @@ const ProviderSidebarLeft = (props) => {
   const [filteredChat, setFilteredChat] = useState([]);
   const [filteredContacts, setFilteredContacts] = useState([]);
 
-  const handleUserClick = (id, client) => {
+  const handleUserClick = (id, provider) => {
+    socket.emit('join room', id);
     props.setSelectedContact({
       contactId: id
     });
     props.setSelectedUser({
-      client: client
+      provider: provider
     });
     setActive(id);
     if (sidebar === true) {
@@ -67,7 +69,7 @@ const ProviderSidebarLeft = (props) => {
           return (
             <li
               key={item._id}
-              onClick={() => handleUserClick(item._id, item.client)}
+              onClick={() => handleUserClick(item._id, item.provider)}
               className={classnames({
                 active: active === item._id
               })}>
@@ -211,4 +213,4 @@ const ProviderSidebarLeft = (props) => {
   );
 };
 
-export default ProviderSidebarLeft;
+export default ClientSidebarLeft;

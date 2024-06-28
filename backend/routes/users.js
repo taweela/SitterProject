@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const multer = require("multer");
 const path = require("path");
 const { getDistanceBetween } = require('../utils/utils');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_APIKEY);
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -141,6 +143,49 @@ router.put('/upload/avatar', upload.single('avatar'), verifyToken(['admin', 'cli
     const updateAvatar = await User.findOneAndUpdate({ _id: req.user._id }, { avatar: imageUri }, { new: true }).select('-password -__v');
 
     return res.send({ updateAvatar: updateAvatar })
+});
+
+router.delete('/delete/:id', verifyToken(['admin']), async (req, res) => {
+    await User.deleteOne({ _id: req.params.id });
+    return res.send({ message: 'User successfully deleted!' });
+});
+
+router.put('/manageStatus/:id', verifyToken(['admin']), async (req, res) => {
+    const updateValues = req.body;
+    const user = await User.findOneAndUpdate({ _id: req.params.id }, updateValues, {
+        new: true,
+    });
+    const frontendUrl = process.env.FRONTEND_URL;
+    const loginLink = `${frontendUrl}/login`;
+    const htmlContent = `
+        <p>Hi ${user.firstName} ${user.lastName},</p>
+        <p>Your Account had become ${user.status}</p>
+        <p>To connect the our site, click the link below:</p>
+        <a href="${loginLink}" target="_blank">Connect Website</a>
+        <p>Thank you!</p>
+    `;
+
+    const msg = {
+        to: user.email,
+        from: process.env.SENDER_EMAIL,
+        subject: `Account Status Updated!`,
+        html: htmlContent,
+    };
+
+    try {
+        await sgMail.send(msg);
+    } catch(error) {
+        return res.status(500).send({ status: 'error', message: error.toString() })
+    }
+    return res.send({ message: 'User Status successfully updated' });
+});
+
+router.put('/update/:id', verifyToken(['admin', 'client', 'serviceProvider']), async (req, res) => {
+    const updateValues = req.body;
+    const updatedUser = await User.findOneAndUpdate({ _id: req.params.id }, updateValues, {
+        new: true,
+    }).select('-__v');
+    return res.send({ updatedUser: updatedUser, message: 'User successfully updated' });
 });
 
 module.exports = router;

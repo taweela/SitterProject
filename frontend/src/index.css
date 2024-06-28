@@ -419,13 +419,6 @@ html body p {
   margin-bottom: 1.25rem;
 }
 
-.chat-profile-sidebar .profile-sidebar-area {
-  height: calc(100% - 200px);
-  position: relative;
-  padding: 0 2rem 1.5rem;
-}
-
-
 .close-icon {
   position: absolute;
   top: 0.85rem;
@@ -798,6 +791,10 @@ h4, .h4 {
 
 .bg-light-primary {
   color: #7367f0 !important;
+}
+
+.bg-light-warning {
+  color: #ffd965 !important;
 }
 
 ul.navbar-nav li .media-list {
@@ -1282,4 +1279,165 @@ ul.navbar-nav li.dropdown-user .dropdown-menu {
 a {
   color: #fc345c;
   text-decoration: none;
+}
+
+.avatar.avatar-xl img {
+  width: 70px;
+  height: 70px;
+}
+
+.chat-profile-sidebar .profile-sidebar-area {
+  padding: 0 2rem 1.5rem;
+}
+
+.chat-profile-sidebar .profile-sidebar-area {
+  height: calc(100% - 200px);
+  position: relative;
+}
+
+.section-label {
+  font-size: 0.85rem;
+  color: #b9b9c3;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.form-check-success .form-check-input:not(:disabled):checked, .form-check-success .form-check-input:not(:disabled):focus {
+  border-color: #28c76f;
+  box-shadow: 0 2px 4px 0 rgba(40, 199, 111, 0.4);
+}
+
+.form-check-success .form-check-input:checked {
+  border-color: #28c76f;
+  background-color: #28c76f;
+}
+
+.form-check-danger .form-check-input:not(:disabled):checked, .form-check-danger .form-check-input:not(:disabled):focus {
+  border-color: #ea5455;
+  box-shadow: 0 2px 4px 0 rgba(234, 84, 85, 0.4);
+}
+
+.form-check-danger .form-check-input:checked {
+  border-color: #ea5455;
+  background-color: #ea5455;
+}
+
+.form-check-warning .form-check-input:not(:disabled):checked, .form-check-warning .form-check-input:not(:disabled):focus {
+  border-color: #ff9f43;
+  box-shadow: 0 2px 4px 0 rgba(255, 159, 67, 0.4);
+}
+
+.form-check-warning .form-check-input:checked {
+  border-color: #ff9f43;
+  background-color: #ff9f43;
+}
+
+.form-check-secondary .form-check-input:not(:disabled):checked, .form-check-secondary .form-check-input:not(:disabled):focus {
+  border-color: #82868b;
+  box-shadow: 0 2px 4px 0 rgba(130, 134, 139, 0.4);
+}
+
+.form-check-secondary .form-check-input:checked {
+  border-color: #82868b;
+  background-color: #82868b;
+}
+
+.avatar .avatar-status-away {
+  background-color: #ff9f43;
+}
+
+.avatar [class*=avatar-status-].avatar-status-xl {
+  width: 17px;
+  height: 17px;
+}
+
+.chat-app-window .active-chat {
+  height: inherit;
+}
+
+.chat-app-window .active-chat .chat-header {
+  background-color: #fff;
+  padding: 0 1rem;
+  border-bottom: 1px solid #ebe9f1;
+}
+
+.chat-app-window .active-chat .chat-header {
+  display: flex;
+  justify-content: space-between;
+  height: 65px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.chat-app-window .user-chats {
+  background-color: #f2f0f7;
+  padding: 1rem;
+}
+
+.chat-app-window .user-chats {
+  position: relative;
+  height: calc(100% - 65px - 65px);
+}
+
+.chat-app-window .chat-app-form {
+  padding: 0 1rem;
+  background-color: #fff;
+  border-top: 1px solid #ebe9f1;
+}
+
+.chat-app-window .chat-app-form {
+  height: 65px;
+  display: flex;
+  align-items: center;
+}
+
+.form-label {
+  font-size: 0.857rem;
+  color: #5e5873;
+}
+
+.chat-app-window .chats .chat-avatar {
+  float: right;
+}
+
+.chat-app-window .chats .chat-left .chat-avatar {
+  float: left;
+}
+
+.chat-app-window .chats .chat-body {
+  margin: 10px 30px 0 0;
+}
+
+.chat-app-window .chats .chat-body {
+  display: block;
+  overflow: hidden;
+}
+
+.chat-app-window .chats .chat-left .chat-body .chat-content {
+  float: left;
+  margin: 0 0 10px 1rem;
+}
+
+.chat-app-window .chats .chat-left .chat-body .chat-content {
+  background: none;
+  background-color: white;
+}
+
+.chat-app-window .chats .chat-left .chat-body .chat-content {
+  color: #6e6b7b;
+}
+
+.chat-app-window .chats .chat-body .chat-content {
+  float: right;
+  margin: 0 1rem 10px 0;
+  background-image: linear-gradient(80deg, #7367f0, #9e95f5);
+}
+
+.chat-app-window .chats .chat-body .chat-content {
+  padding: 0.7rem 1rem;
+  clear: both;
+  border-radius: 0.357rem;
+  box-shadow: 0 4px 8px 0 rgba(34, 41, 47, 0.12);
 }

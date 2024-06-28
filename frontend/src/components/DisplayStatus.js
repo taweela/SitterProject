@@ -5,30 +5,30 @@ export const DisplayStatus = (props) => {
   let color;
   switch (props.status) {
     case 'accepted':
-      color = 'light-success';
+      color = 'success';
       break;
 
     case 'completed':
-      color = 'light-success';
+      color = 'success';
       break;
 
     case 'pending':
-      color = 'light-warning';
+      color = 'warning';
       break;
 
     case 'declined':
-      color = 'light-info';
+      color = 'info';
       break;
 
     case 'deleted':
-      color = 'light-secondary';
+      color = 'secondary';
       break;
     case 'canceled':
-      color = 'light-dark';
+      color = 'dark';
       break;
 
     default:
-      color = 'light-primary';
+      color = 'primary';
       break;
   }
 

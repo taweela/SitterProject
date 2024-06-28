@@ -1,9 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { Card, CardBody, Col, Container, Row } from 'reactstrap';
-import { useGetProviderDashboardsQuery } from '../../redux/api/dashboardAPI';
-import { paymentSum } from '../../utils/Utils';
+import { useGetDashboardsQuery } from '../../redux/api/dashboardAPI';
 
-const ServiceProviderDashboard = () => {
-  const { data: dashData, isLoading } = useGetProviderDashboardsQuery();
+const AdminDashboard = () => {
+  const { data: dashData, isLoading } = useGetDashboardsQuery();
   return (
     <div className="main-view">
       {!isLoading && (
@@ -14,42 +14,32 @@ const ServiceProviderDashboard = () => {
             </Col>
           </Row>
           <Row className="my-3">
-            <Col md="3">
+            <Col md="4">
               <Card>
                 <CardBody>
-                  <h4 className="main-title">Earning</h4>
+                  <h4 className="main-title">Orders</h4>
                   <div className="mt-3 d-flex justify-content-center align-items-center" style={{ minHeight: '100px' }}>
-                    <h4>{paymentSum(dashData.payments)}$</h4>
+                    <h3>{dashData.orders}</h3>
                   </div>
                 </CardBody>
               </Card>
             </Col>
-            <Col md="3">
+            <Col md="4">
               <Card>
                 <CardBody>
-                  <h4 className="main-title">Accept Order</h4>
+                  <h4 className="main-title">Users</h4>
                   <div className="mt-3 d-flex justify-content-center align-items-center" style={{ minHeight: '100px' }}>
-                    <h4>{dashData.acceptedOrders}</h4>
+                    <h3>{dashData.users}</h3>
                   </div>
                 </CardBody>
               </Card>
             </Col>
-            <Col md="3">
+            <Col md="4">
               <Card>
                 <CardBody>
-                  <h4 className="main-title">Pending Order</h4>
+                  <h4 className="main-title">Reviews</h4>
                   <div className="mt-3 d-flex justify-content-center align-items-center" style={{ minHeight: '100px' }}>
-                    <h4>{dashData.pendingOrders}</h4>
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-            <Col md="3">
-              <Card>
-                <CardBody>
-                  <h4 className="main-title">Complete Order</h4>
-                  <div className="mt-3 d-flex justify-content-center align-items-center" style={{ minHeight: '100px' }}>
-                    <h4>{dashData.completedOrders}</h4>
+                    <h3>{dashData.reviews}</h3>
                   </div>
                 </CardBody>
               </Card>
@@ -61,4 +51,4 @@ const ServiceProviderDashboard = () => {
   );
 };
 
-export default ServiceProviderDashboard;
+export default AdminDashboard;

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from './views/auth/Login';
@@ -26,6 +27,9 @@ import ProviderProfile from './views/profile/ProviderProfile';
 import ClientMessage from './views/messages/ClientMessage';
 import ClientOrder from './views/order/ClientOrder';
 import ClientOrderDetail from './views/order/ClientOrderDetail';
+import checkRequests from './hoc/CheckRequests';
+import ProviderOrderDetail from './views/order/ProviderOrderDetail';
+import AdminDashboard from './views/dashboard/AdminDashboard';
 
 const App = () => {
   return (
@@ -35,10 +39,11 @@ const App = () => {
           <Route index element={<Home />} />
           {/* Private Route */}
           <Route element={<RequiredUser allowedRoles={['admin']} />}>
+            <Route path="admin/dashboard" element={<AdminDashboard />} />
             <Route path="admin/clients" element={<Client />} />
             <Route path="admin/service-providers" element={<ServiceProvider />} />
           </Route>
-          <Route element={<RequiredUser allowedRoles={['admin', 'client']} />}>
+          <Route element={<RequiredUser allowedRoles={['admin']} />}>
             <Route path="admin/profile-review/:id" element={<Profile />} />
           </Route>
           <Route element={<RequiredUser allowedRoles={['client']} />}>
@@ -49,6 +54,7 @@ const App = () => {
             <Route path="client/orders/detail/:orderNumber" element={<ClientOrderDetail />} />
             <Route path="client/profile" element={<ClientProfile />} />
             <Route path="client/message" element={<ClientMessage />} />
+            <Route path="client/profile-review/:id" element={<Profile />} />
           </Route>
           <Route element={<RequiredUser allowedRoles={['serviceProvider']} />}>
             <Route path="service-provider/dashboard" element={<ServiceProviderDashboard />} />
@@ -58,6 +64,7 @@ const App = () => {
             <Route path="service-provider/orders" element={<ProviderOrder />} />
             <Route path="service-provider/messages" element={<ProviderMessage />} />
             <Route path="service-provider/profile" element={<ProviderProfile />} />
+            <Route path="service-provider/orders/detail/:orderNumber" element={<ProviderOrderDetail />} />
           </Route>
         </Route>
 
@@ -75,4 +82,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default checkRequests(App);

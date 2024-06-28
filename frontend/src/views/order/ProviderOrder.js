@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { Badge, Card, CardBody, Col, Container, DropdownItem, DropdownMenu, DropdownToggle, Row, UncontrolledDropdown } from 'reactstrap';
 import DataTable from 'react-data-table-component';
-import { AlertCircle, CheckSquare, ChevronDown, MoreVertical, Search, Trash2, X } from 'react-feather';
+import { AlertCircle, CheckSquare, ChevronDown, MoreVertical } from 'react-feather';
 import { useDeleteOrderMutation, useGetOrdersQuery, useManageStatusOrderMutation } from '../../redux/api/orderAPI';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Select from 'react-select';
+import { Link } from 'react-router-dom';
 
 const renderStatus = (row) => {
   const status = row.status;
@@ -82,9 +83,9 @@ const ProviderOrder = () => {
   const columns = () => [
     {
       name: 'Order Number',
-      maxwidth: '100px',
-      selector: (row) => `${row.orderNumber}`,
-      sortable: true
+      cell: (row) => <Link to={`/service-provider/orders/detail/${row.orderNumber}`}>{`#${row.orderNumber}`}</Link>,
+      sortable: true,
+      maxwidth: '100px'
     },
     {
       name: 'Client',

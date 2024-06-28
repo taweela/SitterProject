@@ -118,7 +118,9 @@ const Header = () => {
               {accessToken && user?.role === 'client' && (
                 <>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/client/dashboard')}>Home</NavLink>
+                    <NavLink className={currentRoute.includes('client/dashboard') ? 'active' : ''} onClick={() => navigate('/client/dashboard')}>
+                      Home
+                    </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
                     <NavLink
@@ -133,7 +135,9 @@ const Header = () => {
                     </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('/client/message')}>Message</NavLink>
+                    <NavLink className={currentRoute.includes('client/message') ? 'active' : ''} onClick={() => navigate('/client/message')}>
+                      Message
+                    </NavLink>
                   </NavItem>
                   <UncontrolledDropdown tag="li" className="dropdown-user nav-item">
                     <DropdownToggle href="/" tag="a" className="nav-link dropdown-user-link" onClick={(e) => e.preventDefault()}>
@@ -159,7 +163,11 @@ const Header = () => {
               {accessToken && user?.role === 'serviceProvider' && (
                 <>
                   <NavItem className="nav-item-responsive">
-                    <NavLink onClick={() => navigate('service-provider/dashboard')}>Home</NavLink>
+                    <NavLink
+                      className={currentRoute.includes('service-provider/dashboard') ? 'active' : ''}
+                      onClick={() => navigate('service-provider/dashboard')}>
+                      Home
+                    </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
                     <NavLink
