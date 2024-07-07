@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { Aperture, Heart, Search, Share2, Star } from 'react-feather';
+import { Aperture, Heart, MessageSquare, Search, Star } from 'react-feather';
 import { Link, useNavigate } from 'react-router-dom';
 import classnames from 'classnames';
 import {
@@ -10,48 +10,56 @@ import {
   CardText,
   Col,
   Container,
-  Form,
-  FormGroup,
   Input,
   InputGroup,
   InputGroupText,
   Label,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
   Pagination,
   PaginationItem,
   PaginationLink,
   Row
 } from 'reactstrap';
 import SpinnerComponent from '../../components/SpinnerComponent';
-import { useGetProvidersQuery } from '../../redux/api/userAPI';
 import { useEffect, useState } from 'react';
 import userImg from '../../assets/images/user.png';
 import { useCreateOrderMutation } from '../../redux/api/orderAPI';
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
-import { useCreateCardMutation, useGetCardQuery } from '../../redux/api/cardAPI';
 import { useCreateContactMutation } from '../../redux/api/contactAPI';
+import { checkFavourite, getFilterData, removeFilterData, setFilterData } from '../../utils/Utils';
+import { useAppSelector } from '../../redux/store';
+import { useGetClientServicesQuery, useManageFavouriteUserMutation } from '../../redux/api/serviceAPI';
+import Nouislider from 'nouislider-react';
+import wNumb from 'wnumb';
 
 const ClientServiceProvider = () => {
   const [searchItem, setSearchItem] = useState('');
+  const user = useAppSelector((state) => state.userState.user);
   const navigate = useNavigate();
-  const [distance, setDistance] = useState();
-  const [modalVisibilityCard, setModalVisibilityCard] = useState(false);
-  const [price, setPrice] = useState();
+  const [distance, setDistance] = useState(getFilterData('distance') ? JSON.parse(getFilterData('distance')) : [0, 1000]);
+  const [price, setPrice] = useState(getFilterData('price') ? JSON.parse(getFilterData('price')) : [0, 100]);
   const [page, setPage] = useState(1);
+  const serviceTypeInitial = [
+    {
+      type: 'Babysitter',
+      value: 'babysitter',
+      checked: false
+    },
+    {
+      type: 'Dogsitter',
+      value: 'dogsitter',
+      checked: false
+    },
+    {
+      type: 'Housekeeper',
+      value: 'housekeeper',
+      checked: false
+    }
+  ];
+  const [serviceTypes, setServiceTypes] = useState(getFilterData('serviceTypes') ? JSON.parse(getFilterData('serviceTypes')) : serviceTypeInitial);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [createOrder, { isLoading: orderLoading, isError, error, isSuccess }] = useCreateOrderMutation();
-  const { data: card, refetch } = useGetCardQuery();
-  const [createCard] = useCreateCardMutation();
   const [createContact] = useCreateContactMutation();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm();
+  const [manageFavouriteUser] = useManageFavouriteUserMutation();
 
   const queryParams = {
     q: searchItem,
@@ -61,7 +69,7 @@ const ClientServiceProvider = () => {
     price: price,
     selectedTypes: selectedTypes
   };
-  const { data: provider, isLoading } = useGetProvidersQuery(queryParams);
+  const { data: services, isLoading } = useGetClientServicesQuery(queryParams);
 
   const handleFilter = (q) => {
     setSearchItem(q);
@@ -74,18 +82,19 @@ const ClientServiceProvider = () => {
           <span className="toast-title">Order Requested successfully!</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
     }
     if (isError) {
+      console.log(error);
       toast.error(
         <div className="d-flex align-items-center">
           <span className="toast-title">{error.data.message}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
@@ -103,39 +112,21 @@ const ClientServiceProvider = () => {
     }
   };
 
-  const handleFavourite = (id, val) => {
-    console.log(id, val);
+  const handleFavourite = (id) => {
+    manageFavouriteUser({ id: id });
   };
 
-  const handleOrder = async (providerId) => {
+  const handleOrder = async (providerId, serviceId) => {
     const orderData = {
-      provider: providerId
+      provider: providerId,
+      service: serviceId
     };
-    if (card.status === 'exist') {
-      await createOrder(orderData);
-    } else {
-      setModalVisibilityCard(!modalVisibilityCard);
-    }
+    await createOrder(orderData);
   };
-
-  const serviceTypes = [
-    {
-      type: 'Babysitter',
-      value: 'babysitter'
-    },
-    {
-      type: 'Dogsitter',
-      value: 'dogsitter'
-    },
-    {
-      type: 'Housekeeper',
-      value: 'housekeeper'
-    }
-  ];
 
   // ** Render pages
   const renderPageItems = () => {
-    const arrLength = provider && provider.users.length !== 0 ? Number(provider.totalCount) / provider.users.length : 1;
+    const arrLength = services && services.services.length !== 0 ? Number(services.totalCount) / services.services.length : 1;
 
     return new Array(Math.trunc(arrLength)).fill().map((item, index) => {
       return (
@@ -150,7 +141,7 @@ const ClientServiceProvider = () => {
 
   // ** handle next page click
   const handleNext = () => {
-    if (page !== Number(provider.totalCount) / provider.users.length) {
+    if (page !== Number(services.totalCount) / services.services.length) {
       handlePageChange('next');
     }
   };
@@ -158,72 +149,43 @@ const ClientServiceProvider = () => {
   const renderStars = (item) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
-      if (i < 3.8) {
-        stars.push(
-          <li key={i} className="ratings-list-item me-25">
-            <Star className="filled-star" />
-          </li>
-        );
-      } else if (i - 3.8 < 1 && i - 3.8 > 0) {
-        stars.push(
-          <li key={i} className="ratings-list-item me-25">
-            <svg width="512" height="512" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path
-                fill="#ff9f43"
-                d="m12 15.968l4.247 2.377l-.948-4.773l3.573-3.305l-4.833-.573l-2.038-4.419zm0 2.292l-7.053 3.948l1.575-7.928L.588 8.792l8.027-.952L12 .5l3.385 7.34l8.027.952l-5.934 5.488l1.575 7.928z"
-              />
-            </svg>
-          </li>
-        );
-      } else {
-        stars.push(
-          <li key={i} className="ratings-list-item me-25">
-            <Star className="unfilled-star" />
-          </li>
-        );
-      }
+      stars.push(
+        <li key={i} className="ratings-list-item me-25">
+          <Star key={i} className={i <= item?.averageMarks ? 'filled-star' : 'unfilled-star'} style={{ cursor: 'pointer' }} />
+        </li>
+      );
     }
     return stars;
   };
 
-  const handleDistanceChange = (e) => {
-    const selectedDistance = e.target.id == 'allDistance' ? null : e.target.id;
-    setDistance(selectedDistance);
+  const handleDistanceChange = (values, handle) => {
+    setDistance(values);
+    setFilterData('distance', values);
   };
 
-  const handlePriceChange = (e) => {
-    const selectedPrice = e.target.id == 'allPrice' ? null : e.target.id;
-    setPrice(selectedPrice);
+  const handlePriceChange = (values, handle) => {
+    setPrice(values);
+    setFilterData('price', values);
   };
 
   const handleServiceTypeChange = (e) => {
     const checked = e.target.checked;
     const type = e.target.id;
+
     if (checked) {
-      // Add type to selected array
       setSelectedTypes([...selectedTypes, type]);
     } else {
-      // Remove type from selected array
       setSelectedTypes(selectedTypes.filter((t) => t !== type));
     }
-  };
-
-  const onSubmit = async (data) => {
-    try {
-      await createCard(data); // Wait for the card creation to complete
-      setModalVisibilityCard(!modalVisibilityCard);
-      refetch(); // Refetch the card data after creating a new card
-    } catch (error) {
-      console.error('Error creating card:', error);
-    }
-  };
-
-  const handleClose = async () => {
-    setModalVisibilityCard(!modalVisibilityCard);
-  };
-
-  const handleSaveButtonClick = () => {
-    handleSubmit(onSubmit)();
+    console.log(type, checked);
+    let updatedData = serviceTypes.map((item) => {
+      if (item.value === type) {
+        return { ...item, checked };
+      }
+      return item;
+    });
+    setServiceTypes(updatedData);
+    setFilterData('serviceTypes', updatedData);
   };
 
   const handleContact = async (providerId) => {
@@ -232,6 +194,17 @@ const ClientServiceProvider = () => {
     };
     await createContact(contactData);
     navigate('/client/message');
+  };
+
+  const handleClearFilter = () => {
+    const removeKeys = ['price', 'distance', 'serviceTypes'];
+    removeKeys.forEach((key) => {
+      removeFilterData(key);
+    });
+    setPrice([0, 100]);
+    setDistance([0, 1000]);
+    setSearchItem('');
+    setServiceTypes(serviceTypeInitial);
   };
 
   return (
@@ -248,89 +221,43 @@ const ClientServiceProvider = () => {
               <CardBody>
                 <div className="multi-range-price">
                   <h6 className="filter-title mt-0">Price Range</h6>
-                  <ul className="list-unstyled price-range" onChange={handlePriceChange}>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="allPrice" name="price-range-radio" defaultChecked />
-                        <Label className="form-check-label" for="allPrice">
-                          All
-                        </Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="0-10" name="price-range-radio" />
-                        <Label className="form-check-label" for="0-10">{`<=$10`}</Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="10-100" name="price-range-radio" />
-                        <Label className="form-check-label" for="10-100">
-                          $10-$100
-                        </Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="100-10000" name="price-range-radio" />
-                        <Label className="form-check-label" for="100-10000">
-                          {`>=$100`}
-                        </Label>
-                      </div>
-                    </li>
-                  </ul>
+                  <div className="my-5">
+                    <Nouislider
+                      className="range-slider mt-2"
+                      direction={'ltr'}
+                      start={price}
+                      connect={true}
+                      tooltips={[true, true]}
+                      format={wNumb({
+                        decimals: 0
+                      })}
+                      range={{
+                        min: 0,
+                        max: 100
+                      }}
+                      onChange={handlePriceChange}
+                    />
+                  </div>
                 </div>
                 <div className="multi-range-distance">
                   <h6 className="filter-title mt-0">Distance Range</h6>
-                  <ul className="list-unstyled distance-range" onChange={handleDistanceChange}>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="allDistance" name="distance-range-radio" defaultChecked />
-                        <Label className="form-check-label" for="allDistance">
-                          All
-                        </Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="0-5" name="distance-range-radio" />
-                        <Label className="form-check-label" for="0-5">{`<=5Km`}</Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="5-10" name="distance-range-radio" />
-                        <Label className="form-check-label" for="5-10">
-                          5Km-10Km
-                        </Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="10-20" name="distance-range-radio" />
-                        <Label className="form-check-label" for="10-20">
-                          10Km-20Km
-                        </Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="20-40" name="distance-range-radio" />
-                        <Label className="form-check-label" for="20-40">
-                          20Km-40Km
-                        </Label>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="form-check">
-                        <Input type="radio" id="40-10000" name="distance-range-radio" />
-                        <Label className="form-check-label" for="40>=">
-                          {`>=40Km`}
-                        </Label>
-                      </div>
-                    </li>
-                  </ul>
+                  <div className="my-5">
+                    <Nouislider
+                      className="range-slider mt-2"
+                      direction={'ltr'}
+                      start={distance}
+                      connect={true}
+                      tooltips={[true, true]}
+                      format={wNumb({
+                        decimals: 0
+                      })}
+                      range={{
+                        min: 0,
+                        max: 1000
+                      }}
+                      onChange={handleDistanceChange}
+                    />
+                  </div>
                 </div>
                 <div className="serviceType">
                   <h6 className="filter-title">Service Type</h6>
@@ -339,7 +266,7 @@ const ClientServiceProvider = () => {
                       return (
                         <li key={index}>
                           <div className="form-check">
-                            <Input type="checkbox" id={serviceType.value} defaultChecked={serviceType.checked} onChange={handleServiceTypeChange} />
+                            <Input type="checkbox" id={serviceType.value} checked={serviceType.checked} onChange={handleServiceTypeChange} />
                             <Label className="form-check-label" for={serviceType.value}>
                               {serviceType.type}
                             </Label>
@@ -350,7 +277,7 @@ const ClientServiceProvider = () => {
                   </ul>
                 </div>
                 <div id="clear-filters">
-                  <Button color="primary" block>
+                  <Button color="primary" block onClick={handleClearFilter}>
                     Clear All Filters
                   </Button>
                 </div>
@@ -377,60 +304,62 @@ const ClientServiceProvider = () => {
               <Col sm="12">
                 {isLoading ? (
                   <SpinnerComponent />
-                ) : provider && provider.users.length ? (
+                ) : services && services.services.length ? (
                   <div>
-                    {provider.users.map((item, index) => (
+                    {services.services.map((item, index) => (
                       <Card className="provider-service-card" key={index}>
                         <div className="item-img text-center mx-auto">
-                          <Link to={`/client/service-providers/view/${item.user._id}`}>
-                            <img className="img-fluid card-img-top" src={userImg} alt={item.user.firstName} />
+                          <Link to={`/client/services/view/${item.service?._id}`}>
+                            <img className="img-fluid card-img-top" src={userImg} alt={item.service.user[0]?.firstName} />
                           </Link>
                         </div>
                         <CardBody>
                           <h6 className="item-name">
-                            <Link className="text-body" to={`/client/service-providers/view/${item.user._id}`}>
-                              <span className="provider-style">
-                                {item.user.firstName} {item.user.lastName}
-                              </span>
+                            <Link className="text-body" to={`/client/services/view/${item.service?._id}`}>
+                              <span className="provider-style">{item.service.title}</span>
                             </Link>
-                            <div className="provider-style my-2">{item.user.providerType}</div>
+                            <div className="my-2">
+                              Provider: {item.service.user[0]?.firstName} {item.service.user[0]?.lastName}
+                            </div>
+                            <div className="provider-style my-2">{item.service.user[0]?.providerType}</div>
                             <div className="provider-style my-2">Distance: {item.distance} km</div>
                           </h6>
                           <div className="item-wrapper">
                             <div className="item-rating">
-                              <ul className="unstyled-list list-inline">{renderStars(item)}</ul>
+                              <ul className="unstyled-list list-inline">{renderStars(item.service)}</ul>
                             </div>
                           </div>
-                          <CardText className="item-description">
-                            Finding a qualified babysitter takes time and effort. But your reward is knowing that your child is in capable hands. You will want
-                            to find someone who is mature and friendly, has common sense, and is genuinely fond of children.
-                          </CardText>
+                          <CardText className="item-description">{item.service.description}</CardText>
                         </CardBody>
                         <div className="item-options text-center">
                           <div className="item-wrapper">
+                            {item.isOrdered && (
+                              <div className="mb-3">
+                                <Badge color="success" pill>
+                                  Ordered
+                                </Badge>
+                              </div>
+                            )}
+
                             <div className="item-cost">
-                              <h4 className="item-price mb-2">${item.user.rate}</h4>
-                              {item.user.hasFreeShipping && (
-                                <CardText className="shipping">
-                                  <Badge color="light-success">Free Shipping</Badge>
-                                </CardText>
-                              )}
+                              <h4 className="item-price mb-2">${item.service.user[0]?.rate}</h4>
                             </div>
                           </div>
-                          <Button className="btn-favourite" color="light" onClick={() => handleFavourite(item.user._id, item.user.isInFavourite)}>
+                          <Button className="btn-favourite" color="light" onClick={() => handleFavourite(item.service?._id)}>
                             <Heart
                               className={classnames('me-50', {
-                                'text-danger': item.user.isInFavourite
+                                'text-danger': checkFavourite(item.service?.favourite, user._id)
                               })}
                               size={18}
+                              fill={checkFavourite(item.service.favourite, user._id) ? 'red' : 'none'}
                             />
                             <span>Favourite</span>
                           </Button>
-                          <Button color="primary" className="btn-contact" onClick={() => handleContact(item.user._id)}>
-                            <Share2 className="me-50" size={18} />
-                            <span>Contact</span>
+                          <Button color="primary" className="btn-contact" onClick={() => handleContact(item.service.user[0]?._id)}>
+                            <MessageSquare className="me-50" size={18} />
+                            <span>Start Chat</span>
                           </Button>
-                          <Button color="danger" className="btn-order" onClick={() => handleOrder(item.user._id)}>
+                          <Button color="danger" className="btn-order" onClick={() => handleOrder(item.service.user[0]?._id, item.service._id)}>
                             <Aperture className="me-50" size={18} />
                             <span>Order</span>
                           </Button>
@@ -445,7 +374,7 @@ const ClientServiceProvider = () => {
                       <PaginationItem
                         className="next-item"
                         onClick={() => handleNext()}
-                        disabled={page === Number(provider.totalCount) / provider.users.length}>
+                        disabled={page === Number(services.totalCount) / services.services.length}>
                         <PaginationLink href="/" onClick={(e) => e.preventDefault()}></PaginationLink>
                       </PaginationItem>
                     </Pagination>
@@ -459,72 +388,6 @@ const ClientServiceProvider = () => {
             </Row>
           </Col>
         </Row>
-        <Modal isOpen={modalVisibilityCard}>
-          <ModalHeader>Card Information</ModalHeader>
-          <ModalBody>
-            <Form onSubmit={handleSubmit(onSubmit)}>
-              <FormGroup>
-                <Label>Card Number</Label>
-                <input
-                  className={`form-control ${errors.cardNumber ? 'is-invalid' : ''}`}
-                  type="text"
-                  id="cardNumber"
-                  placeholder="Card Number"
-                  {...register('cardNumber', {
-                    required: 'Card Number is required.',
-                    pattern: {
-                      value: /^\d{16}$/,
-                      message: 'Please enter a valid 16-digit card number.'
-                    }
-                  })}
-                />
-                {errors.cardNumber && <span className="text-danger">{errors.cardNumber.message}</span>}
-              </FormGroup>
-              <FormGroup>
-                <Label>Expiration Date</Label>
-                <input
-                  className={`form-control ${errors.expiration_date ? 'is-invalid' : ''}`}
-                  type="text"
-                  id="expiration_date"
-                  placeholder="MM/YY"
-                  {...register('expiration_date', {
-                    required: 'Expiration Date is required.',
-                    pattern: {
-                      value: /^(0[1-9]|1[0-2])\/\d{2}$/,
-                      message: 'Please enter a valid MM/YY format.'
-                    }
-                  })}
-                />
-                {errors.expiration_date && <span className="text-danger">{errors.expiration_date.message}</span>}
-              </FormGroup>
-              <FormGroup>
-                <Label>CVC</Label>
-                <input
-                  className={`form-control ${errors.cvc ? 'is-invalid' : ''}`}
-                  type="text"
-                  id="cvc"
-                  placeholder="CVC"
-                  {...register('cvc', {
-                    required: 'CVC is required.',
-                    pattern: {
-                      value: /^\d{3}$/,
-                      message: 'Please enter a valid 3-digit CVC.'
-                    }
-                  })}
-                />
-                {errors.cvc && <span className="text-danger">{errors.cvc.message}</span>}
-              </FormGroup>
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={handleSaveButtonClick}>
-              Save
-            </Button>
-            <Button color="secondary" onClick={handleClose}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </Modal>
       </Container>
     </div>
   );

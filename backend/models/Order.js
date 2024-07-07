@@ -10,6 +10,10 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    service: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Service',
+    },
     status: {
         type: String,
         enum: ['pending', 'accepted', 'declined', 'completed', 'canceled'],

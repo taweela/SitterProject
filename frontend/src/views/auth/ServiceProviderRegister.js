@@ -50,7 +50,7 @@ const ServiceProviderRegister = () => {
           <span className="toast-title">User registered successfully</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
@@ -63,7 +63,7 @@ const ServiceProviderRegister = () => {
           <span className="toast-title">{error.data}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );

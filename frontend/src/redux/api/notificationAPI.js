@@ -5,10 +5,10 @@ import { navigate } from 'raviger';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
-export const reviewAPI = createApi({
-  reducerPath: 'reviewAPI',
+export const notificationAPI = createApi({
+  reducerPath: 'notificationAPI',
   baseQuery: fetchBaseQuery({
-    baseUrl: `${BASE_URL}/api/reviews`,
+    baseUrl: `${BASE_URL}/api/notifications`,
     prepareHeaders: (headers) => {
       const accessToken = getToken();
       if (accessToken) {
@@ -17,20 +17,20 @@ export const reviewAPI = createApi({
       return headers;
     }
   }),
-  tagTypes: ['Reviews'],
+  tagTypes: ['Notifications'],
   endpoints: (builder) => ({
-    getReviews: builder.query({
-      query(id) {
+    getNotifications: builder.query({
+      query() {
         return {
-          url: `/${id}`,
+          url: `/`,
           credentials: 'include'
         };
       },
       providesTags: (result, error, id) => {
-        return [{ type: 'Reviews', id }];
+        return [{ type: 'Notifications', id }];
       },
       transformResponse(result) {
-        return result.reviews;
+        return result;
       },
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
@@ -45,29 +45,19 @@ export const reviewAPI = createApi({
         }
       }
     }),
-    createReview: builder.mutation({
-      query(payload) {
+    readNotifiction: builder.mutation({
+      query({ notificationId }) {
         return {
-          url: '/create',
-          method: 'POST',
+          url: `/read/${notificationId}`,
+          method: 'PUT',
           credentials: 'include',
-          body: payload
+          body: {}
         };
       },
-      invalidatesTags: [{ type: 'Reviews', id: 'LIST' }],
-      transformResponse: (result) => result.card
-    }),
-    deleteReview: builder.mutation({
-      query(id) {
-        return {
-          url: `/delete/${id}`,
-          method: 'DELETE',
-          credentials: 'include'
-        };
-      },
-      invalidatesTags: [{ type: 'Reviews', id: 'LIST' }]
+      invalidatesTags: [{ type: 'Notifications', id: 'LIST' }],
+      transformResponse: (result) => result
     })
   })
 });
 
-export const { useCreateReviewMutation, useGetReviewsQuery, useDeleteReviewMutation } = reviewAPI;
+export const { useReadNotifictionMutation, useGetNotificationsQuery } = notificationAPI;

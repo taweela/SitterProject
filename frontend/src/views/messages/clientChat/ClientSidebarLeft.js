@@ -1,34 +1,33 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import classnames from 'classnames';
-import { X, Search, CheckSquare, Bell, User, Trash } from 'react-feather';
+import { X, Search } from 'react-feather';
 import Avatar from '../../../components/Avatar';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import 'react-perfect-scrollbar/dist/css/styles.css';
-import { CardText, InputGroup, InputGroupText, Badge, Input, Button, Label } from 'reactstrap';
+import { CardText, InputGroup, InputGroupText, Badge, Input } from 'reactstrap';
 import userImg from '../../../assets/images/user.png';
 import { useState } from 'react';
 import { useAppSelector } from '../../../redux/store';
 import { formatDate } from '../../../utils/Utils';
 import io from 'socket.io-client';
+import { useReadMessageMutation } from '../../../redux/api/contactAPI';
 
 const socket = io('http://localhost:3008');
 
 const ClientSidebarLeft = (props) => {
   // ** Props & Store
-  const { sidebar, handleSidebar, userSidebarLeft, handleUserSidebarLeft, chats } = props;
+  const { chats } = props;
   const user = useAppSelector((state) => state.userState.user);
-
+  const [readMessage] = useReadMessageMutation();
   // ** State
   const [query, setQuery] = useState('');
-  const [about, setAbout] = useState('');
   const [active, setActive] = useState(0);
   const [status, setStatus] = useState('online');
   const [filteredChat, setFilteredChat] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
 
-  const handleUserClick = (id, provider) => {
-    socket.emit('join room', id);
+  const handleUserClick = async (id, provider) => {
+    socket.emit('joinRoom', id);
     props.setSelectedContact({
       contactId: id
     });
@@ -36,9 +35,7 @@ const ClientSidebarLeft = (props) => {
       provider: provider
     });
     setActive(id);
-    if (sidebar === true) {
-      handleSidebar();
-    }
+    await readMessage({ contactId: id, data: provider._id });
   };
 
   // ** Handles Filter
@@ -103,97 +100,19 @@ const ClientSidebarLeft = (props) => {
     }
   };
 
-  const renderAboutCount = () => {
-    if (user && user.description && user.description.length && user.description.length === 0) {
-      return user.description.length;
-    } else {
-      return user.description.length;
-    }
-  };
-
   return (
     <div className="sidebar-left">
       <div className="sidebar">
-        <div
-          className={classnames('chat-profile-sidebar', {
-            show: userSidebarLeft
-          })}>
-          <div className="chat-profile-header">
-            <div className="close-icon" onClick={handleUserSidebarLeft}>
-              <X size={14} />
-            </div>
-            <div className="header-profile-sidebar">
-              <Avatar className="box-shadow-1 avatar-border" img={user.avatar ? user.avatar : userImg} status={status} size="xl" />
-              <h4 className="chat-user-name">
-                {user.firstName} {user.lastName}
-              </h4>
-              <span className="user-post">{user.role}</span>
-            </div>
-          </div>
-          <PerfectScrollbar className="profile-sidebar-area" options={{ wheelPropagation: false }}>
-            <h6 className="section-label mb-1">About</h6>
-            <div className="about-user">
-              <Input
-                rows="5"
-                type="textarea"
-                defaultValue={user.description}
-                onChange={(e) => setAbout(e.target.value)}
-                className={classnames('char-textarea', {
-                  'text-danger': user.description && user.description.length > 120
-                })}
-              />
-              <small className="counter-value float-end">
-                <span className="char-count">{renderAboutCount()}</span> / 120
-              </small>
-            </div>
-            <h6 className="section-label mb-1 mt-3">Status</h6>
-            <ul className="list-unstyled user-status">
-              <li className="pb-1">
-                <div className="form-check form-check-success">
-                  <Input type="radio" label="Online" id="user-online" checked={status === 'online'} onChange={() => setStatus('online')} />
-                  <Label className="form-check-label" for="user-online">
-                    Online
-                  </Label>
-                </div>
-              </li>
-              <li className="pb-1">
-                <div className="form-check form-check-danger">
-                  <Input type="radio" id="user-busy" label="Do Not Disturb" checked={status === 'busy'} onChange={() => setStatus('busy')} />
-                  <Label className="form-check-label" for="user-busy">
-                    Busy
-                  </Label>
-                </div>
-              </li>
-              <li className="pb-1">
-                <div className="form-check form-check-warning">
-                  <Input type="radio" label="Away" id="user-away" checked={status === 'away'} onChange={() => setStatus('away')} />
-                  <Label className="form-check-label" for="user-away">
-                    Away
-                  </Label>
-                </div>
-              </li>
-              <li className="pb-1">
-                <div className="form-check form-check-secondary">
-                  <Input type="radio" label="Offline" id="user-offline" checked={status === 'offline'} onChange={() => setStatus('offline')} />
-                  <Label className="form-check-label" for="user-offline">
-                    Offline
-                  </Label>
-                </div>
-              </li>
-            </ul>
-          </PerfectScrollbar>
-        </div>
-        <div
-          className={classnames('sidebar-content', {
-            show: sidebar === true
-          })}>
-          <div className="sidebar-close-icon" onClick={handleSidebar}>
+        <div className={classnames('sidebar-content')}>
+          <div className="sidebar-close-icon">
             <X size={14} />
           </div>
           <div className="chat-fixed-search">
             <div className="d-flex align-items-center w-100">
-              <div className="sidebar-profile-toggle" onClick={handleUserSidebarLeft}>
-                {Object.keys(user).length ? <Avatar className="avatar-border" img={userImg} status={status} imgHeight="42" imgWidth="42" /> : null}
+              <div className="sidebar-profile-toggle">
+                {Object.keys(user).length ? (
+                  <Avatar className="avatar-border" img={user.avatar ? user.avatar : userImg} status={status} imgHeight="42" imgWidth="42" />
+                ) : null}
               </div>
               <InputGroup className="input-group-merge ms-1 w-100">
                 <InputGroupText className="round">

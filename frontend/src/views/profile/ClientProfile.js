@@ -41,7 +41,7 @@ const ClientProfile = () => {
           <span className="toast-title">Profile updated successfully</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
@@ -53,7 +53,7 @@ const ClientProfile = () => {
           <span className="toast-title">{error.data}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );

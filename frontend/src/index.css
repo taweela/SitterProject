@@ -1422,7 +1422,7 @@ a {
 
 .chat-app-window .chats .chat-left .chat-body .chat-content {
   background: none;
-  background-color: white;
+  background-color: #54c973;
 }
 
 .chat-app-window .chats .chat-left .chat-body .chat-content {
@@ -1440,4 +1440,67 @@ a {
   clear: both;
   border-radius: 0.357rem;
   box-shadow: 0 4px 8px 0 rgba(34, 41, 47, 0.12);
+}
+
+.chat-app-window .chats .chat-body .chat-content {
+  color: #fff!important;
+  max-width: 75%;
+}
+
+.chat-app-window .chats .chat-body .chat-content p {
+  margin: 0;
+  color: #fff!important;
+}
+
+.filled-star {
+  fill: #ff9f43;
+  stroke: #ff9f43;
+  color: #ff9f43;
+}
+
+.noUi-target {
+  background-color: rgba(115, 103, 240, 0.12);
+  border-width: 0;
+  box-shadow: none;
+  border-radius: 1rem;
+}
+
+.noUi-connect {
+  background: #7367f0;
+  box-shadow: none;
+}
+
+.noUi-horizontal {
+  height: 8px;
+}
+
+.noUi-horizontal .noUi-handle {
+  width: 10px;
+  height: 15px;
+  right: -8px;
+  top: -4px;
+}
+
+.noUi-handle:before, .noUi-handle:after {
+  content: "";
+  display: block;
+  position: absolute;
+  height: 14px;
+  width: 1px;
+  background: none;
+  left: 14px;
+  top: 6px;
+}
+
+.noUi-tooltip {
+  display: block;
+  position: absolute;
+  border: 1px solid #D9D9D9;
+  border-radius: 3px;
+  background: #fff;
+  color: #000;
+  padding: 0px;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 10px;
 }

@@ -14,11 +14,12 @@ router.get('/:provider', verifyToken(['client', 'serviceProvider', 'admin']), as
 });
 
 router.post('/create', verifyToken(['client', 'serviceProvider']), async (req, res) => {
-    const { description, client, provider } = req.body;
+    const { description, client, provider, marks } = req.body;
     const review = new Review({
         client: client,
         description: description,
-        provider: provider
+        provider: provider,
+        marks: marks
     });
     try {
         const savedReview = await review.save()
@@ -27,6 +28,11 @@ router.post('/create', verifyToken(['client', 'serviceProvider']), async (req, r
     } catch (err) {
         return res.status(400).send(err);
     }
+});
+
+router.delete('/delete/:id', verifyToken(['admin', 'client']), async (req, res) => {
+    await Review.deleteOne({ _id: req.params.id });
+    return res.send({ message: 'Review successfully deleted!' });
 });
 
 module.exports = router;

@@ -11,22 +11,31 @@ import { useCreatePaymentMutation } from '../../redux/api/paymentAPI';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCreateReviewMutation } from '../../redux/api/reviewAPI';
+import { Star } from 'react-feather';
 
 const ClientOrderDetail = () => {
   const navigate = useNavigate();
   const { orderNumber } = useParams();
-  const { data: order, isLoading } = useGetOrderNumberQuery(orderNumber);
+  const { data: order, isLoading, refetch } = useGetOrderNumberQuery(orderNumber);
   const [createPayment, { isLoading: payLoading, isSuccess, isError, error }] = useCreatePaymentMutation();
   const [createReview] = useCreateReviewMutation();
   const [modalVisibility, setModalVisibility] = useState(false);
+  const [selectedStars, setSelectedStars] = useState(0);
+  const [hoveredStars, setHoveredStars] = useState(0);
+  const [totalStars, setTotalStars] = useState(5);
   const {
-    register,
-    handleSubmit,
-    formState: { errors }
+    register: registerForm1,
+    handleSubmit: handleSubmit1,
+    formState: { errors: errorsForm1 }
   } = useForm();
-  console.log(order);
 
-  const onSubmit = (data) => {
+  const {
+    register: registerForm2,
+    handleSubmit: handleSubmit2,
+    formState: { errors: errorsForm2 }
+  } = useForm();
+
+  const onSubmitPayment = (data) => {
     console.log(data);
     if (data.type == 'hourly') {
       data.amount = parseFloat(data.amount) * order.provider?.rate;
@@ -46,25 +55,60 @@ const ClientOrderDetail = () => {
           <span className="toast-title">{error.data}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
     }
   }, [payLoading]);
 
+  useEffect(() => {
+    refetch();
+  }, []);
+
   const onSubmitReview = async (data) => {
     data.client = order.client._id;
     data.provider = order.provider._id;
+    data.marks = hoveredStars || selectedStars;
     await createReview(data);
     navigate(`/client/profile-review/${order.provider?._id}`);
   };
   const handleSaveButtonClick = () => {
-    handleSubmit(onSubmitReview)();
+    handleSubmit2(onSubmitReview)();
   };
 
   const handleClose = async () => {
     setModalVisibility(!modalVisibility);
+  };
+
+  const handleStarHover = (star) => {
+    setHoveredStars(star);
+  };
+
+  const handleStarClick = (star) => {
+    setSelectedStars(star);
+  };
+
+  const renderStars = () => {
+    let stars = [];
+    for (let i = 1; i <= totalStars; i++) {
+      stars.push(
+        <li key={i} className="ratings-list-item me-25">
+          <Star
+            key={i}
+            onClick={() => handleStarClick(i)}
+            onMouseEnter={() => handleStarHover(i)}
+            className={i <= (hoveredStars || selectedStars) ? 'filled-star' : 'unfilled-star'}
+            style={{ cursor: 'pointer' }}
+          />
+        </li>
+      );
+    }
+    return stars;
+  };
+
+  const handleSubmitOnClick = () => {
+    handleSubmit1(onSubmitPayment)();
   };
   return (
     <div className="main-view">
@@ -81,7 +125,9 @@ const ClientOrderDetail = () => {
                         <div className="card-text mb-2">
                           {order.client?.firstName} {order.client?.lastName}
                         </div>
-                        <div className="card-text mb-2">{order.client?.email}</div>
+                        <div className="card-text mb-2">
+                          <a href={`/client/profile-review/${order.provider?._id}`}>{order.client?.email}</a>
+                        </div>
                       </Col>
                       <Col className=" mt-xl-0 mt-2" lg="4">
                         <div className="invoice-number-date mt-md-0 mt-2">
@@ -104,10 +150,6 @@ const ClientOrderDetail = () => {
                         <h5 className="mb-2">Order For:</h5>
                         <div className="mb-0">
                           <strong>{order.provider.firstName ? `${order.provider.firstName} ${order.provider.lastName}` : 'Loading...'}</strong>
-                        </div>
-                        <div className="mb-0">
-                          <div>Latitude: {order.provider.latitude}</div>
-                          <div>Longitude: {order.provider.longitude}</div>
                         </div>
                         <small className="mb-1 d-block">{order.provider.address}</small>
                         <div className="mb-0">
@@ -136,7 +178,7 @@ const ClientOrderDetail = () => {
                       </Row>
                     )}
                     {order.status == 'accepted' && (
-                      <Form onSubmit={handleSubmit(onSubmit)}>
+                      <Form id="paymentForm" onSubmit={handleSubmit1(onSubmitPayment)}>
                         <Row className="d-flex justify-content-between">
                           <Col className="" md="6">
                             <FormGroup>
@@ -145,8 +187,8 @@ const ClientOrderDetail = () => {
                                 type="text"
                                 name="type"
                                 id="type"
-                                className={`form-control ${classnames({ 'is-invalid': errors.type })}`}
-                                {...register('type', { required: true })}>
+                                className={`form-control ${classnames({ 'is-invalid': errorsForm1.type })}`}
+                                {...registerForm1('type', { required: true })}>
                                 <option value="fixed">Fixed</option>
                                 <option value="hourly">Hourly</option>
                               </select>
@@ -159,15 +201,15 @@ const ClientOrderDetail = () => {
                                 type="text"
                                 id="amount"
                                 name="amount"
-                                className={`form-control ${classnames({ 'is-invalid': errors.amount })}`}
-                                {...register('amount', { required: true })}
+                                className={`form-control ${classnames({ 'is-invalid': errorsForm1.amount })}`}
+                                {...registerForm1('amount', { required: true })}
                               />
                             </FormGroup>
                           </Col>
                         </Row>
                         <Row>
                           <Col md="12">
-                            <Button color="success" className="btn-block btn-sm" type="submit">
+                            <Button color="success" className="btn-block btn-sm" type="button" onClick={handleSubmitOnClick}>
                               Pay
                             </Button>
                           </Col>
@@ -182,22 +224,28 @@ const ClientOrderDetail = () => {
             </Card>
           </Col>
         </Row>
-        <Modal isOpen={modalVisibility}>
-          <ModalHeader>Review</ModalHeader>
+        <Modal isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
+          <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Review</ModalHeader>
           <ModalBody>
-            <Form onSubmit={handleSubmit(onSubmitReview)}>
+            <Form onSubmit={handleSubmit2(onSubmitReview)} id="review">
+              <FormGroup>
+                <Label>Marks</Label>
+                <div className="item-rating">
+                  <ul className="unstyled-list list-inline">{renderStars()}</ul>
+                </div>
+              </FormGroup>
               <FormGroup>
                 <Label>Review</Label>
                 <textarea
-                  className={`form-control ${errors.description ? 'is-invalid' : ''}`}
+                  className={`form-control ${errorsForm2.description ? 'is-invalid' : ''}`}
                   type="text"
                   id="description"
                   rows={6}
                   placeholder="Please input here..."
-                  {...register('description', {
+                  {...registerForm2('description', {
                     required: 'Review is required.'
                   })}></textarea>
-                {errors.description && <span className="text-danger">{errors.description.message}</span>}
+                {errorsForm2.description && <span className="text-danger">{errorsForm2.description.message}</span>}
               </FormGroup>
             </Form>
           </ModalBody>

@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { getToken } from '../../utils/Utils';
+import { getToken, removeToken, removeUserData } from '../../utils/Utils';
+import { navigate } from 'raviger';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -30,6 +31,18 @@ export const contactAPI = createApi({
       },
       transformResponse(result) {
         return result.contacts;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
       }
     }),
     selectChat: builder.query({
@@ -45,6 +58,18 @@ export const contactAPI = createApi({
       },
       transformResponse(result) {
         return result;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
       }
     }),
     createContact: builder.mutation({
@@ -58,8 +83,36 @@ export const contactAPI = createApi({
       },
       invalidatesTags: [{ type: 'Contacts', id: 'LIST' }],
       transformResponse: (result) => result
+    }),
+    readMessage: builder.mutation({
+      query({ contactId, data }) {
+        return {
+          url: `/read/${contactId}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: {
+            provider: data
+          }
+        };
+      },
+      invalidatesTags: [{ type: 'Contacts', id: 'LIST' }],
+      transformResponse: (result) => result
+    }),
+    readProviderMessage: builder.mutation({
+      query({ contactId, data }) {
+        return {
+          url: `/read/${contactId}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: {
+            client: data
+          }
+        };
+      },
+      invalidatesTags: [{ type: 'Contacts', id: 'LIST' }],
+      transformResponse: (result) => result
     })
   })
 });
 
-export const { useCreateContactMutation, useGetContactsQuery, useSelectChatQuery } = contactAPI;
+export const { useCreateContactMutation, useGetContactsQuery, useSelectChatQuery, useReadProviderMessageMutation, useReadMessageMutation } = contactAPI;

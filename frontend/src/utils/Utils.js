@@ -25,6 +25,18 @@ export const setUserData = (val) => {
   localStorage.setItem('userData', val);
 };
 
+export const setFilterData = (key, val) => {
+  localStorage.setItem(key, JSON.stringify(val));
+};
+
+export const removeFilterData = (key) => {
+  localStorage.removeItem(key);
+};
+
+export const getFilterData = (key) => {
+  return localStorage.getItem(key);
+};
+
 export const getDateFormat = (formattedDate) => {
   const formattedDateMoment = moment(`${formattedDate}`, 'YYYY-MM-DD HH:mm A');
   const formattedDateTime = moment(formattedDateMoment).format('llll');
@@ -43,4 +55,9 @@ export const paymentSum = (payments) => {
     return total + parseFloat(payment.amount);
   }, paymentSum);
   return sum;
+};
+
+export const checkFavourite = (favourite, user) => {
+  const checkFavouriteValue = favourite?.includes(user);
+  return checkFavouriteValue;
 };

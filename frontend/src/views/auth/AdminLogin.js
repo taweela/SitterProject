@@ -30,7 +30,7 @@ const AdminLogin = () => {
           <span className="toast-title">Welcome, Success Admin Login!</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
@@ -44,7 +44,7 @@ const AdminLogin = () => {
           <span className="toast-title">{error.data.message}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );

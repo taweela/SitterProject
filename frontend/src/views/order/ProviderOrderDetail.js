@@ -48,10 +48,6 @@ const ProviderOrderDetail = () => {
                         <div className="mb-0">
                           <strong>{order.provider.firstName ? `${order.provider.firstName} ${order.provider.lastName}` : 'Loading...'}</strong>
                         </div>
-                        <div className="mb-0">
-                          <div>Latitude: {order.provider.latitude}</div>
-                          <div>Longitude: {order.provider.longitude}</div>
-                        </div>
                         <small className="mb-1 d-block">{order.provider.address}</small>
                         <div className="mb-0">
                           <strong>Email: {order.provider.email}</strong>

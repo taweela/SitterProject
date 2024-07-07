@@ -14,6 +14,18 @@ const ServiceProviderDashboard = () => {
             </Col>
           </Row>
           <Row className="my-3">
+            <Col>
+              <Card>
+                <CardBody className="p-4">
+                  <div className="main-title">
+                    Offering reliable, flexible childcare in all the ways you need it, Smart Sitting has been at the forefront of professional childcare
+                    services in New York for over a decade.
+                  </div>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row className="my-3">
             <Col md="3">
               <Card>
                 <CardBody>

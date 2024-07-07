@@ -69,7 +69,7 @@ const ProviderOrder = () => {
           <span className="toast-title">Order Status Changed successfully!</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );

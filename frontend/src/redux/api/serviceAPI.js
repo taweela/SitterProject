@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { getToken } from '../../utils/Utils';
+import { getToken, removeToken, removeUserData } from '../../utils/Utils';
+import { navigate } from 'raviger';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -41,6 +42,55 @@ export const serviceAPI = createApi({
       },
       transformResponse(results) {
         return results.services;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
+      }
+    }),
+    getClientServices: builder.query({
+      query: (args) => {
+        return {
+          url: '/client',
+          params: { ...args },
+          credentials: 'include'
+        };
+      },
+      providesTags(result) {
+        if (result && result.users) {
+          return [
+            ...result.users.map(({ id }) => ({
+              type: 'Services',
+              id
+            })),
+            { type: 'Services', id: 'LIST' }
+          ];
+        } else {
+          return [{ type: 'Services', id: 'LIST' }];
+        }
+      },
+      transformResponse(results) {
+        return results;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
       }
     }),
     getService: builder.query({
@@ -102,6 +152,18 @@ export const serviceAPI = createApi({
         };
       },
       invalidatesTags: [{ type: 'Services', id: 'LIST' }]
+    }),
+    manageFavouriteUser: builder.mutation({
+      query({ id }) {
+        return {
+          url: `/favourite/${id}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: {}
+        };
+      },
+      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
+      transformResponse: (result) => result
     })
   })
 });
@@ -112,5 +174,7 @@ export const {
   useGetServiceQuery,
   useUpdateServiceMutation,
   useDeleteServiceMutation,
-  useManageStatusServiceMutation
+  useManageStatusServiceMutation,
+  useGetClientServicesQuery,
+  useManageFavouriteUserMutation
 } = serviceAPI;

@@ -27,7 +27,6 @@ import ProviderProfile from './views/profile/ProviderProfile';
 import ClientMessage from './views/messages/ClientMessage';
 import ClientOrder from './views/order/ClientOrder';
 import ClientOrderDetail from './views/order/ClientOrderDetail';
-import checkRequests from './hoc/CheckRequests';
 import ProviderOrderDetail from './views/order/ProviderOrderDetail';
 import AdminDashboard from './views/dashboard/AdminDashboard';
 
@@ -48,8 +47,8 @@ const App = () => {
           </Route>
           <Route element={<RequiredUser allowedRoles={['client']} />}>
             <Route path="client/dashboard" element={<ClientDashboard />} />
-            <Route path="client/service-providers" element={<ClientServiceProvider />} />
-            <Route path="client/service-providers/view/:id" element={<ClientSeriveProviderView />} />
+            <Route path="client/services" element={<ClientServiceProvider />} />
+            <Route path="client/services/view/:id" element={<ClientSeriveProviderView />} />
             <Route path="client/orders" element={<ClientOrder />} />
             <Route path="client/orders/detail/:orderNumber" element={<ClientOrderDetail />} />
             <Route path="client/profile" element={<ClientProfile />} />
@@ -82,4 +81,4 @@ const App = () => {
   );
 };
 
-export default checkRequests(App);
+export default App;

@@ -1,22 +1,26 @@
 const mongoose = require('mongoose');
 
-const reviewSchema = new mongoose.Schema({
-    description: {
+const notificationSchema = new mongoose.Schema({
+    content: {
         type: String,
-        required: true
+        required: true,
     },
-    client: {
+    read: {
+        type: Boolean,
+        default: false,
+    },
+    sender: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    provider: {
+    receiver: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    marks: {
-        type: Number,
-        required: true
-    }
+    type: {
+        type: String,
+        required: true,
+    },
 }, {
     timestamps: {
         createdAt: 'createdAt',
@@ -24,4 +28,4 @@ const reviewSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Review', reviewSchema);
+module.exports = mongoose.model('Notification', notificationSchema);

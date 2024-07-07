@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { getToken } from '../../utils/Utils';
+import { getToken, removeToken, removeUserData } from '../../utils/Utils';
+import { navigate } from 'raviger';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -41,6 +42,18 @@ export const orderAPI = createApi({
       },
       transformResponse(results) {
         return results.orders;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
       }
     }),
     getOrder: builder.query({
@@ -69,6 +82,18 @@ export const orderAPI = createApi({
       },
       transformResponse(result) {
         return result;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
       }
     }),
     createOrder: builder.mutation({

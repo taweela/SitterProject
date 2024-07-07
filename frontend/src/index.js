@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 
 import SpinnerComponent from './components/SpinnerComponent';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'nouislider/distribute/nouislider.css';
 import './index.css';
 import './assets/scss/app-loader.scss';
 

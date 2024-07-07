@@ -91,7 +91,7 @@ export const columns = () => [
               <span className="toast-title">User deleted successfully</span>
             </div>,
             {
-              duration: 4000,
+              duration: 2000,
               position: 'top-right'
             }
           );

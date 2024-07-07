@@ -74,7 +74,7 @@ router.get('/', verifyToken(['client', 'serviceProvider']), async (req, res) => 
                                     $and: [
                                         { $eq: ['$contact', '$$contactId'] },
                                         { $eq: ['$receiver', '$$userId'] },
-                                        { $eq: ['$readStatus', false] }
+                                        { $eq: ['$read', false] }
                                     ]
                                 }
                             }
@@ -169,6 +169,34 @@ router.get('/selectChat', verifyToken(['admin', 'client', 'serviceProvider']), a
     ])
 
     return res.status(200).send({ chats: chats })
+});
+
+router.put('/read/:contactId', verifyToken(['admin', 'client', 'serviceProvider']), async (req, res) => {
+    const contactId = new ObjectId(req.params.contactId);
+    const senderId = req.body.provider ? new ObjectId(req.body.provider) : new ObjectId(req.body.client);
+
+    const filterQuery = {
+        contact: contactId,
+        $or: [
+            { sender: senderId },
+        ]
+    };
+
+    try {
+        const updatedMessages = await Message.updateMany(
+            filterQuery,
+            { $set: { read: true } }
+        );
+
+        if (updatedMessages.nModified === 0) {
+            return res.status(404).send({ message: 'No messages found for the provided contact and user' });
+        }
+
+        return res.send({ message: 'All messages marked as read successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: 'Internal Server Error' });
+    }
 });
 
 module.exports = router;

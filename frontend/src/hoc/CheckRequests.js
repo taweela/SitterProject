@@ -8,9 +8,13 @@ const checkRequests = (Wrapped) => {
     useEffect(() => {
       axios.defaults.withCredentials = true;
       axios.interceptors.response.use(
-        (response) => response,
+        (response) => {
+          console.log(response, '------------------------------');
+          return response;
+        },
         (error) => {
           if (error.response) {
+            console.log(error.response, '------------------------------');
             switch (error.response.status) {
               case 503:
                 logoutUser();

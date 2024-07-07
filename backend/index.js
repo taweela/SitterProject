@@ -36,6 +36,8 @@ const Message = require('./models/Message');
 const PaymentRoute = require('./routes/payments');
 const DashboardRoute = require('./routes/dashboard');
 const ReviewRoute = require('./routes/reviews');
+const NotificationRoute = require('./routes/notifications');
+const Notification = require('./models/Notification');
 
 // increase parse limit
 app.use(bodyParser.json({ limit: '50mb', extended: true }));
@@ -69,40 +71,75 @@ app.use('/api/contacts', contactRoute);
 app.use('/api/payments', PaymentRoute);
 app.use('/api/dashboards', DashboardRoute);
 app.use('/api/reviews', ReviewRoute);
+app.use('/api/notifications', NotificationRoute);
 
 const server = http.createServer(app);
 // Set up Socket.io with proper CORS handling
 const io = socketIo(server, {
-  cors: {
-    origin: ['http://localhost:3001'], // Include all client app origins
-    methods: ["GET", "POST"], // Allowed methods
-    credentials: true // Enable credentials (cookies, sessions, etc.)
-  }
+    cors: {
+        origin: ['http://localhost:3000'],
+        methods: ["GET", "POST"],
+        credentials: true
+    }
 });
 
 io.on('connection', (socket) => {
-    console.log('A user connected');
-
-    socket.on('join room', (room) => {
+    socket.on('joinRoom', (room) => {
+        socket.room = room;
         socket.join(room);
     });
 
-    socket.on('chat message', async (msg) => {
-        console.log(msg, '------------------')
-        io.to(msg.room).emit('chat message', msg);
-        
+    socket.on('chatMessage', async (msg) => {
         const newMessage = new Message({
             content: msg.text,
             sender: msg.sender,
             receiver: msg.receiver,
             contact: msg.contact,
         });
-        
-        await newMessage.save();
+
+        const newMsg = await newMessage.save();
+        const msg1 = await Message.aggregate([
+            {
+                $match: { _id: newMsg._id},
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'sender',
+                    foreignField: '_id',
+                    as: 'sender'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'receiver',
+                    foreignField: '_id',
+                    as: 'receiver'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'contacts',
+                    localField: 'contact',
+                    foreignField: '_id',
+                    as: 'contact'
+                }
+            }
+        ]);
+        io.emit('message', msg1[0]);
+        const notification = new Notification({
+            sender: msg.sender,
+            receiver: msg.receiver,
+            content: "You have new message!",
+            read: false,
+            type: 'message'
+        });
+        await notification.save()
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected');
+        io.emit('message', 'User has left the chat');
     });
 });
 

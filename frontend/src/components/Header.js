@@ -16,7 +16,6 @@ import {
 } from 'reactstrap';
 import userImg from '../assets/images/user.png';
 import logo1Img from '../assets/images/logo-1.png';
-import logo2Img from '../assets/images/logo/logo.png';
 import { getToken } from '../utils/Utils';
 import { useLogoutUserMutation } from '../redux/api/getMeAPI';
 import toast from 'react-hot-toast';
@@ -46,7 +45,7 @@ const Header = () => {
           <span className="toast-title">{error.data.message}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
@@ -123,10 +122,8 @@ const Header = () => {
                     </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink
-                      className={currentRoute.includes('client/service-providers') ? 'active' : ''}
-                      onClick={() => navigate('/client/service-providers')}>
-                      Service Providers
+                    <NavLink className={currentRoute.includes('client/services') ? 'active' : ''} onClick={() => navigate('/client/services')}>
+                      Services
                     </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
@@ -139,6 +136,7 @@ const Header = () => {
                       Message
                     </NavLink>
                   </NavItem>
+                  <NotificationDropdown />
                   <UncontrolledDropdown tag="li" className="dropdown-user nav-item">
                     <DropdownToggle href="/" tag="a" className="nav-link dropdown-user-link" onClick={(e) => e.preventDefault()}>
                       <div className="user-nav d-sm-flex d-none">
