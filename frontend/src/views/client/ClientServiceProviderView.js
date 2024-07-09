@@ -12,7 +12,6 @@ const ClientSeriveProviderView = () => {
   const navigate = useNavigate();
   const [createContact] = useCreateContactMutation();
   const { data: service, isLoading } = useGetServiceQuery(id);
-  console.log(service, '----------');
 
   const handleContact = async (providerId) => {
     const contactData = {

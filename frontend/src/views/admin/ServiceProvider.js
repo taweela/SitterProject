@@ -89,7 +89,6 @@ const ServiceProvider = () => {
   };
 
   const handleManageStatus = (id, status) => {
-    console.log(id, status, '-----------');
     manageStatusUser({ id: id, status: { status: status } });
   };
 
@@ -101,7 +100,6 @@ const ServiceProvider = () => {
   ];
   const handleStatusChange = (data) => {
     setCurrentStatus(data || { value: '', label: 'Status...' });
-    console.log(data);
   };
   const columns = () => [
     {

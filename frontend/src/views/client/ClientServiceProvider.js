@@ -10,10 +10,16 @@ import {
   CardText,
   Col,
   Container,
+  Form,
+  FormGroup,
   Input,
   InputGroup,
   InputGroupText,
   Label,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
   Pagination,
   PaginationItem,
   PaginationLink,
@@ -22,14 +28,18 @@ import {
 import SpinnerComponent from '../../components/SpinnerComponent';
 import { useEffect, useState } from 'react';
 import userImg from '../../assets/images/user.png';
-import { useCreateOrderMutation } from '../../redux/api/orderAPI';
+import { useCreateOrderMutation, useDeleteOrderMutation } from '../../redux/api/orderAPI';
 import toast from 'react-hot-toast';
 import { useCreateContactMutation } from '../../redux/api/contactAPI';
-import { checkFavourite, getFilterData, removeFilterData, setFilterData } from '../../utils/Utils';
+import { calendarFormateDate, checkFavourite, getDateFormat, getFilterData, removeFilterData, setFilterData } from '../../utils/Utils';
 import { useAppSelector } from '../../redux/store';
-import { useGetClientServicesQuery, useManageFavouriteUserMutation } from '../../redux/api/serviceAPI';
 import Nouislider from 'nouislider-react';
 import wNumb from 'wnumb';
+import { useForm } from 'react-hook-form';
+import Calendar from './Calendar';
+import { useGetProvidersQuery, useManageFavouriteUserMutation } from '../../redux/api/userAPI';
+import AddEditEventSidebar from './AddEditEventSidebar';
+import { useGetEntitiesQuery } from '../../redux/api/entityAPI';
 
 const ClientServiceProvider = () => {
   const [searchItem, setSearchItem] = useState('');
@@ -37,6 +47,13 @@ const ClientServiceProvider = () => {
   const navigate = useNavigate();
   const [distance, setDistance] = useState(getFilterData('distance') ? JSON.parse(getFilterData('distance')) : [0, 1000]);
   const [price, setPrice] = useState(getFilterData('price') ? JSON.parse(getFilterData('price')) : [0, 100]);
+  const [favourite, setFavourite] = useState(getFilterData('favourite') ? JSON.parse(getFilterData('favourite')) : false);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors }
+  } = useForm();
   const [page, setPage] = useState(1);
   const serviceTypeInitial = [
     {
@@ -59,7 +76,17 @@ const ClientServiceProvider = () => {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [createOrder, { isLoading: orderLoading, isError, error, isSuccess }] = useCreateOrderMutation();
   const [createContact] = useCreateContactMutation();
+  const { data: entities } = useGetEntitiesQuery();
   const [manageFavouriteUser] = useManageFavouriteUserMutation();
+  const [modalVisibility, setModalVisibility] = useState(false);
+  const [calendarApi, setCalendarApi] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [addSidebarOpen, setAddSidebarOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState({});
+  const [providerData, setProviderData] = useState();
+  const [deleteOrder] = useDeleteOrderMutation();
+
+  const handleAddEventSidebar = () => setAddSidebarOpen(!addSidebarOpen);
 
   const queryParams = {
     q: searchItem,
@@ -67,12 +94,20 @@ const ClientServiceProvider = () => {
     page: page,
     distance: distance,
     price: price,
-    selectedTypes: selectedTypes
+    selectedTypes: selectedTypes,
+    favourite: favourite
   };
-  const { data: services, isLoading } = useGetClientServicesQuery(queryParams);
 
+  const { data: services, isLoading, refetch } = useGetProvidersQuery(queryParams);
   const handleFilter = (q) => {
     setSearchItem(q);
+  };
+
+  const calendarsColor = {
+    baby: 'primary',
+    house: 'warning',
+    dog: 'danger',
+    schedule: 'success'
   };
 
   useEffect(() => {
@@ -116,17 +151,32 @@ const ClientServiceProvider = () => {
     manageFavouriteUser({ id: id });
   };
 
-  const handleOrder = async (providerId, serviceId) => {
-    const orderData = {
-      provider: providerId,
-      service: serviceId
-    };
-    await createOrder(orderData);
+  const handleOrder = async (providerId, serviceProvider) => {
+    refetch();
+    let eventList = [];
+    serviceProvider.order.forEach((order) => {
+      eventList.push({
+        allDay: false,
+        end: calendarFormateDate(order.endDate),
+        extendedProps: { calendar: order.type },
+        _id: order._id,
+        start: calendarFormateDate(order.startDate),
+        title: order.title,
+        provider: order.provider,
+        client: order.client,
+        description: order.description,
+        entity: order.entity
+      });
+    });
+    setEvents(eventList);
+    setProviderData(providerId);
+
+    setModalVisibility(!modalVisibility);
   };
 
   // ** Render pages
   const renderPageItems = () => {
-    const arrLength = services && services.services.length !== 0 ? Number(services.totalCount) / services.services.length : 1;
+    const arrLength = services && services.serviceProviders.length !== 0 ? Number(services.totalCount) / services.serviceProviders.length : 1;
 
     return new Array(Math.trunc(arrLength)).fill().map((item, index) => {
       return (
@@ -141,7 +191,7 @@ const ClientServiceProvider = () => {
 
   // ** handle next page click
   const handleNext = () => {
-    if (page !== Number(services.totalCount) / services.services.length) {
+    if (page !== Number(services.totalCount) / services.serviceProviders.length) {
       handlePageChange('next');
     }
   };
@@ -177,7 +227,6 @@ const ClientServiceProvider = () => {
     } else {
       setSelectedTypes(selectedTypes.filter((t) => t !== type));
     }
-    console.log(type, checked);
     let updatedData = serviceTypes.map((item) => {
       if (item.value === type) {
         return { ...item, checked };
@@ -205,6 +254,35 @@ const ClientServiceProvider = () => {
     setDistance([0, 1000]);
     setSearchItem('');
     setServiceTypes(serviceTypeInitial);
+  };
+
+  // const handleOrderClick = () => {};
+
+  const handleClose = () => {
+    setModalVisibility(!modalVisibility);
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+
+  const refetchEvents = () => {
+    if (calendarApi !== null) {
+      calendarApi.refetchEvents();
+    }
+  };
+
+  // ** Blank Event Object
+  const blankEvent = {
+    title: '',
+    start: '',
+    end: '',
+    allDay: false,
+    entity: { value: '', label: '', color: 'primary', entype: '' },
+    extendedProps: {
+      calendar: '',
+      description: ''
+    }
   };
 
   return (
@@ -276,6 +354,27 @@ const ClientServiceProvider = () => {
                     })}
                   </ul>
                 </div>
+                <div className="my-1">
+                  <h6 className="filter-title">Favourite Filter</h6>
+                  <ul className="list-unstyled price-range">
+                    <li>
+                      <div className="form-check">
+                        <Input
+                          type="checkbox"
+                          id="favourite"
+                          checked={favourite}
+                          onChange={() => {
+                            setFilterData('favourite', !favourite);
+                            setFavourite(!favourite);
+                          }}
+                        />
+                        <Label className="form-check-label" for="favourite">
+                          Favourite
+                        </Label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
                 <div id="clear-filters">
                   <Button color="primary" block onClick={handleClearFilter}>
                     Clear All Filters
@@ -304,66 +403,91 @@ const ClientServiceProvider = () => {
               <Col sm="12">
                 {isLoading ? (
                   <SpinnerComponent />
-                ) : services && services.services.length ? (
+                ) : services && services.serviceProviders.length ? (
                   <div>
-                    {services.services.map((item, index) => (
+                    {services.serviceProviders.map((item, index) => (
                       <Card className="provider-service-card" key={index}>
                         <div className="item-img text-center mx-auto">
-                          <Link to={`/client/services/view/${item.service?._id}`}>
-                            <img className="img-fluid card-img-top" src={userImg} alt={item.service.user[0]?.firstName} />
-                          </Link>
+                          {/* <Link to={`/client/service-providers/view/${item.serviceProvider?._id}`}>
+                            <img className="img-fluid card-img-top" src={userImg} alt={item.serviceProvider?.firstName} />
+                          </Link> */}
+                          <img className="img-fluid card-img-top" src={userImg} alt={item.serviceProvider?.firstName} />
                         </div>
                         <CardBody>
                           <h6 className="item-name">
-                            <Link className="text-body" to={`/client/services/view/${item.service?._id}`}>
-                              <span className="provider-style">{item.service.title}</span>
-                            </Link>
-                            <div className="my-2">
-                              Provider: {item.service.user[0]?.firstName} {item.service.user[0]?.lastName}
-                            </div>
-                            <div className="provider-style my-2">{item.service.user[0]?.providerType}</div>
+                            {/* <Link className="text-body" to={`/client/service-providers/view/${item.serviceProvider?._id}`}> */}
+                            <span className="provider-style">
+                              {item.serviceProvider?.firstName} {item.serviceProvider?.lastName}
+                            </span>
+                            {/* </Link> */}
+                            <div className="provider-style my-2">{item.serviceProvider?.providerType}</div>
                             <div className="provider-style my-2">Distance: {item.distance} km</div>
                           </h6>
                           <div className="item-wrapper">
                             <div className="item-rating">
-                              <ul className="unstyled-list list-inline">{renderStars(item.service)}</ul>
+                              <ul className="unstyled-list list-inline">{renderStars(item.serviceProvider)}</ul>
                             </div>
                           </div>
-                          <CardText className="item-description">{item.service.description}</CardText>
+                          <CardText className="item-description">{item.serviceProvider.description}</CardText>
                         </CardBody>
                         <div className="item-options text-center">
                           <div className="item-wrapper">
-                            {item.isOrdered && (
-                              <div className="mb-3">
-                                <Badge color="success" pill>
-                                  Ordered
-                                </Badge>
-                              </div>
-                            )}
-
                             <div className="item-cost">
-                              <h4 className="item-price mb-2">${item.service.user[0]?.rate}</h4>
+                              <h4 className="item-price mb-2">${item.serviceProvider?.rate}</h4>
                             </div>
                           </div>
-                          <Button className="btn-favourite" color="light" onClick={() => handleFavourite(item.service?._id)}>
+                          <Button className="btn-favourite" color="light" onClick={() => handleFavourite(item.serviceProvider?._id)}>
                             <Heart
                               className={classnames('me-50', {
-                                'text-danger': checkFavourite(item.service?.favourite, user._id)
+                                'text-danger': checkFavourite(item.serviceProvider?.favourite, user._id)
                               })}
                               size={18}
-                              fill={checkFavourite(item.service.favourite, user._id) ? 'red' : 'none'}
+                              fill={checkFavourite(item.serviceProvider.favourite, user._id) ? 'red' : 'none'}
                             />
                             <span>Favourite</span>
                           </Button>
-                          <Button color="primary" className="btn-contact" onClick={() => handleContact(item.service.user[0]?._id)}>
+                          <Button color="primary" className="btn-contact" onClick={() => handleContact(item.serviceProvider?._id)}>
                             <MessageSquare className="me-50" size={18} />
                             <span>Start Chat</span>
                           </Button>
-                          <Button color="danger" className="btn-order" onClick={() => handleOrder(item.service.user[0]?._id, item.service._id)}>
+                          <Button color="danger" className="btn-order" onClick={() => handleOrder(item.serviceProvider?._id, item.serviceProvider)}>
                             <Aperture className="me-50" size={18} />
                             <span>Order</span>
                           </Button>
                         </div>
+                        <Modal className="modal-dialog-centered modal-lg" isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
+                          <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Order Manage</ModalHeader>
+                          <ModalBody>
+                            <Row>
+                              <Col>
+                                <div className="mt-0">
+                                  <span style={{ color: 'red', fontWeight: '600' }}>Working Schedule: </span>
+                                  {item.serviceProvider.fromDate ? (
+                                    <>
+                                      {getDateFormat(item.serviceProvider.fromDate)} ~ {getDateFormat(item.serviceProvider.toDate)}
+                                    </>
+                                  ) : (
+                                    'No Schedule'
+                                  )}
+                                </div>
+                              </Col>
+                            </Row>
+                            <Row>
+                              <Col className="position-relative">
+                                <Calendar
+                                  events={events}
+                                  blankEvent={blankEvent}
+                                  calendarApi={calendarApi}
+                                  selectedEvent={selectedEvent}
+                                  setSelectedEvent={setSelectedEvent}
+                                  calendarsColor={calendarsColor}
+                                  setCalendarApi={setCalendarApi}
+                                  handleAddEventSidebar={handleAddEventSidebar}
+                                />
+                              </Col>
+                            </Row>
+                          </ModalBody>
+                        </Modal>
                       </Card>
                     ))}
                     <Pagination className="d-flex justify-content-center service-provider-pagination mt-2">
@@ -374,7 +498,7 @@ const ClientServiceProvider = () => {
                       <PaginationItem
                         className="next-item"
                         onClick={() => handleNext()}
-                        disabled={page === Number(services.totalCount) / services.services.length}>
+                        disabled={page === Number(services.totalCount) / services.serviceProviders.length}>
                         <PaginationLink href="/" onClick={(e) => e.preventDefault()}></PaginationLink>
                       </PaginationItem>
                     </Pagination>
@@ -388,6 +512,21 @@ const ClientServiceProvider = () => {
             </Row>
           </Col>
         </Row>
+        <AddEditEventSidebar
+          open={addSidebarOpen}
+          calendarApi={calendarApi}
+          refetchEvents={refetchEvents}
+          calendarsColor={calendarsColor}
+          selectedEvent={selectedEvent}
+          setSelectedEvent={setSelectedEvent}
+          handleAddEventSidebar={handleAddEventSidebar}
+          entities={entities}
+          events={events}
+          setEvents={setEvents}
+          createOrder={createOrder}
+          providerData={providerData}
+          deleteOrder={deleteOrder}
+        />
       </Container>
     </div>
   );

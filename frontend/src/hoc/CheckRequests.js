@@ -9,12 +9,12 @@ const checkRequests = (Wrapped) => {
       axios.defaults.withCredentials = true;
       axios.interceptors.response.use(
         (response) => {
-          console.log(response, '------------------------------');
+          // console.log(response, '------------------------------');
           return response;
         },
         (error) => {
           if (error.response) {
-            console.log(error.response, '------------------------------');
+            // console.log(error.response, '------------------------------');
             switch (error.response.status) {
               case 503:
                 logoutUser();

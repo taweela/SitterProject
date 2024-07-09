@@ -94,6 +94,43 @@ export const userAPI = createApi({
       invalidatesTags: [{ type: 'Users', id: 'LIST' }],
       transformResponse: (result) => result
     }),
+    getProviders: builder.query({
+      query: (args) => {
+        return {
+          url: '/serviceProvider',
+          params: { ...args },
+          credentials: 'include'
+        };
+      },
+      providesTags(result) {
+        if (result && result.users) {
+          return [
+            ...result.users.map(({ id }) => ({
+              type: 'Users',
+              id
+            })),
+            { type: 'Users', id: 'LIST' }
+          ];
+        } else {
+          return [{ type: 'Users', id: 'LIST' }];
+        }
+      },
+      transformResponse(results) {
+        return results;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
+      }
+    }),
     deleteUser: builder.mutation({
       query(id) {
         return {
@@ -103,10 +140,30 @@ export const userAPI = createApi({
         };
       },
       invalidatesTags: [{ type: 'Users', id: 'LIST' }]
+    }),
+    manageFavouriteUser: builder.mutation({
+      query({ id }) {
+        return {
+          url: `/favourite/${id}`,
+          method: 'PUT',
+          credentials: 'include',
+          body: {}
+        };
+      },
+      invalidatesTags: [{ type: 'Users', id: 'LIST' }],
+      transformResponse: (result) => result
     })
   })
 });
 
 // Add error handling for 401 Unauthorized error
 
-export const { useGetUsersQuery, useGetUserQuery, useUpdateUserMutation, useDeleteUserMutation, useManageStatusUserMutation } = userAPI;
+export const {
+  useGetUsersQuery,
+  useGetUserQuery,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  useManageStatusUserMutation,
+  useGetProvidersQuery,
+  useManageFavouriteUserMutation
+} = userAPI;

@@ -152,18 +152,6 @@ export const serviceAPI = createApi({
         };
       },
       invalidatesTags: [{ type: 'Services', id: 'LIST' }]
-    }),
-    manageFavouriteUser: builder.mutation({
-      query({ id }) {
-        return {
-          url: `/favourite/${id}`,
-          method: 'PUT',
-          credentials: 'include',
-          body: {}
-        };
-      },
-      invalidatesTags: [{ type: 'Services', id: 'LIST' }],
-      transformResponse: (result) => result
     })
   })
 });
@@ -175,6 +163,5 @@ export const {
   useUpdateServiceMutation,
   useDeleteServiceMutation,
   useManageStatusServiceMutation,
-  useGetClientServicesQuery,
-  useManageFavouriteUserMutation
+  useGetClientServicesQuery
 } = serviceAPI;

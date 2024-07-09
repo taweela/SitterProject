@@ -87,7 +87,7 @@ const EditProviderService = () => {
           <span className="toast-title">Service updated successfully!</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );
@@ -99,7 +99,7 @@ const EditProviderService = () => {
           <span className="toast-title">{error.data.message}</span>
         </div>,
         {
-          duration: 4000,
+          duration: 2000,
           position: 'top-right'
         }
       );

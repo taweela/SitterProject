@@ -14,6 +14,7 @@ import { paymentAPI } from './api/paymentAPI';
 import { dashboardAPI } from './api/dashboardAPI';
 import { reviewAPI } from './api/reviewAPI';
 import { notificationAPI } from './api/notificationAPI';
+import { entityAPI } from './api/entityAPI';
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     [dashboardAPI.reducerPath]: dashboardAPI.reducer,
     [reviewAPI.reducerPath]: reviewAPI.reducer,
     [notificationAPI.reducerPath]: notificationAPI.reducer,
+    [entityAPI.reducerPath]: entityAPI.reducer,
     userState: userReducer,
     contactState: contactReducer
   },
@@ -44,7 +46,8 @@ export const store = configureStore({
       paymentAPI.middleware,
       dashboardAPI.middleware,
       reviewAPI.middleware,
-      notificationAPI.middleware
+      notificationAPI.middleware,
+      entityAPI.middleware
     ])
 });
 

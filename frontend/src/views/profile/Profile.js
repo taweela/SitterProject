@@ -4,7 +4,7 @@ import userImg from '../../assets/images/user.png';
 import { useParams } from 'react-router-dom';
 import { useGetUserQuery } from '../../redux/api/userAPI';
 import SpinnerComponent from '../../components/SpinnerComponent';
-import { getDateFormat } from '../../utils/Utils';
+import { getDateFormat, standardFormatDate } from '../../utils/Utils';
 import { useDeleteReviewMutation, useGetReviewsQuery } from '../../redux/api/reviewAPI';
 import { useEffect } from 'react';
 import { Star, Trash2 } from 'react-feather';
@@ -105,6 +105,20 @@ const Profile = () => {
                       <div className="mt-3">
                         <h5 className="mb-2">Experience:</h5>
                         <p className="card-text">{user.experience} years</p>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-6">
+                          <div className="mt-3">
+                            <h5 className="mb-2">From Date:</h5>
+                            <p className="card-text">{getDateFormat(user.fromDate)}</p>
+                          </div>
+                        </div>
+                        <div className="col-sm-6">
+                          <div className="mt-3">
+                            <h5 className="mb-2">To Date:</h5>
+                            <p className="card-text">{getDateFormat(user.toDate)}</p>
+                          </div>
+                        </div>
                       </div>
                       <hr />
                       <div className="mt-3">

@@ -61,6 +61,17 @@ const userSchema = new mongoose.Schema({
     experience: {
         type: String,
     },
+    fromDate: {
+        type: Date,
+    },
+    toDate: {
+        type: Date,
+    },
+    favourite: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    }],
     lastLogin: {
         type: Date,
     },

@@ -4,21 +4,27 @@ import userImg from '../../assets/images/user.png';
 import SpinnerComponent from '../../components/SpinnerComponent';
 import { getDateFormat, getUserData } from '../../utils/Utils';
 import { getMeAPI, useUploadProfileAvatarMutation } from '../../redux/api/getMeAPI';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { useUpdateUserMutation } from '../../redux/api/userAPI';
 import toast from 'react-hot-toast';
 import { Edit2 } from 'react-feather';
 import classnames from 'classnames';
+import Flatpickr from 'react-flatpickr';
+import moment from 'moment';
 import { useGetReviewsQuery } from '../../redux/api/reviewAPI';
 
 const ProviderProfile = () => {
+  const [fromDate, setFromDate] = useState();
+  const [toDate, setToDate] = useState();
   const { data: user, isLoading } = getMeAPI.endpoints.getMe.useQuery(null);
   const myData = getUserData() ? JSON.parse(getUserData()) : null;
   const {
     register,
     handleSubmit,
     setValue,
+    control,
+    watch,
     formState: { errors }
   } = useForm();
   const [uploadProfileAvatar] = useUploadProfileAvatarMutation();
@@ -28,7 +34,7 @@ const ProviderProfile = () => {
 
   useEffect(() => {
     if (user) {
-      const fields = ['firstName', 'lastName', 'email', 'address', 'description', 'experience', 'rate'];
+      const fields = ['firstName', 'lastName', 'email', 'address', 'description', 'experience', 'rate', 'fromDate', 'toDate'];
       fields.forEach((field) => setValue(field, user[field]));
       if (user.avatar) {
         setAvatarFile(user.avatar);
@@ -62,15 +68,20 @@ const ProviderProfile = () => {
   }, [userLoading]);
 
   const onSubmit = (data) => {
-    if (avatarFile) {
-      data.avatar = avatarFile;
+    if (validateDateRange(data.fromDate, data.toDate)) {
+      if (avatarFile) {
+        data.avatar = avatarFile;
+      }
+      updateUser({ id: user._id, user: data });
     }
-    updateUser({ id: user._id, user: data });
   };
   const handleAvatar = () => {
     const fileInput = document.getElementById('updateAvatar');
     fileInput.click();
   };
+
+  const watchFromDate = watch('fromDate');
+  const watchToDate = watch('toDate');
   const manageAvatar = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -84,6 +95,13 @@ const ProviderProfile = () => {
       const avatarData = result.data.updateAvatar.avatar;
       setAvatarFile(avatarData);
     }
+  };
+
+  const validateDateRange = (fromDate, toDate) => {
+    if (fromDate && toDate && new Date(fromDate) >= new Date(toDate)) {
+      return false;
+    }
+    return true;
   };
   return (
     <div className="main-view">
@@ -197,6 +215,67 @@ const ProviderProfile = () => {
                             {...register('rate', { required: true })}
                           />
                         </FormGroup>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-12">
+                          <FormGroup>
+                            <Label className="form-label" for="fromDate">
+                              From Date
+                            </Label>
+                            <Controller
+                              control={control}
+                              name="fromDate"
+                              rules={{ required: true }}
+                              render={({ field: { onChange, ...fieldProps } }) => (
+                                <Flatpickr
+                                  {...fieldProps}
+                                  className={`form-control ${classnames({ 'is-invalid': errors.fromDate })}`}
+                                  onChange={(date, currentdateString) => {
+                                    setFromDate(date);
+                                    onChange(currentdateString);
+                                  }}
+                                  options={{
+                                    enableTime: true,
+                                    dateFormat: 'Y-m-d H:i'
+                                  }}
+                                />
+                              )}
+                            />
+                            {errors.fromDate && <small className="text-danger mt-1">From Date is required</small>}
+                          </FormGroup>
+                          {!validateDateRange(watchFromDate, watchToDate) && (
+                            <div className="alert alert-danger" role="alert">
+                              From Date must be equal to or before To Date
+                            </div>
+                          )}
+                        </div>
+                        <div className="col-sm-12">
+                          <FormGroup>
+                            <Label className="form-label" for="toDate">
+                              To Date
+                            </Label>
+                            <Controller
+                              control={control}
+                              name="toDate"
+                              rules={{ required: true }}
+                              render={({ field: { onChange, ...fieldProps } }) => (
+                                <Flatpickr
+                                  {...fieldProps}
+                                  className={`form-control ${classnames({ 'is-invalid': errors.toDate })}`}
+                                  onChange={(date, currentdateString) => {
+                                    setToDate(date);
+                                    onChange(currentdateString);
+                                  }}
+                                  options={{
+                                    enableTime: true,
+                                    dateFormat: 'Y-m-d H:i'
+                                  }}
+                                />
+                              )}
+                            />
+                            {errors.toDate && <small className="text-danger mt-1">To Date is required</small>}
+                          </FormGroup>
+                        </div>
                       </div>
                       <hr />
                       <div className="mt-3">

@@ -37,7 +37,7 @@ const CreateProviderService = () => {
     { value: 'fixed', label: 'Fixed' },
     { value: 'hourly', label: 'Hourly' }
   ];
-  console.log(errors);
+
   const onSubmit = (data) => {
     if (!addressObj) {
       errors.address = {};

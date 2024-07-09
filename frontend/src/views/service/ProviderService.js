@@ -85,7 +85,7 @@ export const columns = () => [
               <span className="toast-title">Service deleted successfully</span>
             </div>,
             {
-              duration: 4000,
+              duration: 2000,
               position: 'top-right'
             }
           );
@@ -104,7 +104,7 @@ export const columns = () => [
               <span className="toast-title">Status changed successfully</span>
             </div>,
             {
-              duration: 4000,
+              duration: 2000,
               position: 'top-right'
             }
           );

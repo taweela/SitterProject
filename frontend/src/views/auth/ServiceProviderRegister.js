@@ -41,7 +41,6 @@ const ServiceProviderRegister = () => {
       registerUser(data);
     }
   };
-  console.log(errors);
 
   useEffect(() => {
     if (isSuccess) {

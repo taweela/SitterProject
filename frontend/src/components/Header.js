@@ -122,8 +122,10 @@ const Header = () => {
                     </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
-                    <NavLink className={currentRoute.includes('client/services') ? 'active' : ''} onClick={() => navigate('/client/services')}>
-                      Services
+                    <NavLink
+                      className={currentRoute.includes('client/service-providers') ? 'active' : ''}
+                      onClick={() => navigate('/client/service-providers')}>
+                      Service Providers
                     </NavLink>
                   </NavItem>
                   <NavItem className="nav-item-responsive">
@@ -167,13 +169,13 @@ const Header = () => {
                       Home
                     </NavLink>
                   </NavItem>
-                  <NavItem className="nav-item-responsive">
+                  {/* <NavItem className="nav-item-responsive">
                     <NavLink
                       className={currentRoute.includes('service-provider/services') ? 'active' : ''}
                       onClick={() => navigate('service-provider/services')}>
                       Services
                     </NavLink>
-                  </NavItem>
+                  </NavItem> */}
                   <NavItem className="nav-item-responsive">
                     <NavLink className={currentRoute.includes('service-provider/orders') ? 'active' : ''} onClick={() => navigate('service-provider/orders')}>
                       Orders

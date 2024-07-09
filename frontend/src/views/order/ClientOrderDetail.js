@@ -4,7 +4,7 @@ import { DisplayStatus } from '../../components/DisplayStatus';
 import SpinnerComponent from '../../components/SpinnerComponent';
 import { useGetOrderNumberQuery } from '../../redux/api/orderAPI';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getDateFormat, paymentSum } from '../../utils/Utils';
+import { getDateFormat, getHourDifference, paymentSum } from '../../utils/Utils';
 import { useForm } from 'react-hook-form';
 import classnames from 'classnames';
 import { useCreatePaymentMutation } from '../../redux/api/paymentAPI';
@@ -23,6 +23,7 @@ const ClientOrderDetail = () => {
   const [selectedStars, setSelectedStars] = useState(0);
   const [hoveredStars, setHoveredStars] = useState(0);
   const [totalStars, setTotalStars] = useState(5);
+  const [selectedType, setSelectedType] = useState('fixed');
   const {
     register: registerForm1,
     handleSubmit: handleSubmit1,
@@ -36,9 +37,8 @@ const ClientOrderDetail = () => {
   } = useForm();
 
   const onSubmitPayment = (data) => {
-    console.log(data);
     if (data.type == 'hourly') {
-      data.amount = parseFloat(data.amount) * order.provider?.rate;
+      data.amount = getHourDifference(order.startDate, order.endDate) * order.provider?.rate;
     }
     data.provider = order.provider?._id;
     data.order = order._id;
@@ -146,7 +146,7 @@ const ClientOrderDetail = () => {
                   <hr className="order-spacing" />
                   <CardBody className="mt-3 p-3">
                     <Row className="d-flex justify-content-between">
-                      <Col className="" lg="4">
+                      <Col className="" lg="6">
                         <h5 className="mb-2">Order For:</h5>
                         <div className="mb-0">
                           <strong>{order.provider.firstName ? `${order.provider.firstName} ${order.provider.lastName}` : 'Loading...'}</strong>
@@ -162,6 +162,8 @@ const ClientOrderDetail = () => {
                             </div>
                           )}
                         </div>
+                        <div className="mb-0">Start Date: {getDateFormat(order.startDate)}</div>
+                        <div className="mb-0">End Date: {getDateFormat(order.endDate)}</div>
                       </Col>
                     </Row>
                   </CardBody>
@@ -188,24 +190,27 @@ const ClientOrderDetail = () => {
                                 name="type"
                                 id="type"
                                 className={`form-control ${classnames({ 'is-invalid': errorsForm1.type })}`}
-                                {...registerForm1('type', { required: true })}>
+                                {...registerForm1('type', { required: true })}
+                                onChange={(e) => setSelectedType(e.target.value)}>
                                 <option value="fixed">Fixed</option>
                                 <option value="hourly">Hourly</option>
                               </select>
                             </FormGroup>
                           </Col>
-                          <Col className="" md="6">
-                            <FormGroup>
-                              <Label className="mb-0">Amount:</Label>
-                              <input
-                                type="text"
-                                id="amount"
-                                name="amount"
-                                className={`form-control ${classnames({ 'is-invalid': errorsForm1.amount })}`}
-                                {...registerForm1('amount', { required: true })}
-                              />
-                            </FormGroup>
-                          </Col>
+                          {selectedType === 'fixed' && (
+                            <Col className="" md="6">
+                              <FormGroup>
+                                <Label className="mb-0">Amount:</Label>
+                                <input
+                                  type="text"
+                                  id="amount"
+                                  name="amount"
+                                  className={`form-control ${classnames({ 'is-invalid': errorsForm1.amount })}`}
+                                  {...registerForm1('amount', { required: true })}
+                                />
+                              </FormGroup>
+                            </Col>
+                          )}
                         </Row>
                         <Row>
                           <Col md="12">

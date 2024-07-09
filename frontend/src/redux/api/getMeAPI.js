@@ -35,7 +35,6 @@ export const getMeAPI = createApi({
           const { data } = await queryFulfilled;
           dispatch(setUser(data));
         } catch (error) {
-          console.log(error.error.originalStatus);
           if (error.error.originalStatus == 401) {
             removeToken();
             removeUserData();

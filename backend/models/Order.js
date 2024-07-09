@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const orderSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
     client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -10,9 +14,27 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    service: {
+    startDate: {
+        type: Date,
+    },
+    endDate: {
+        type: Date,
+    },
+    description: {
+        type: String,
+    },
+    entity: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Service',
+        refPath: 'entityModel',
+    },
+    entityModel: {
+        type: String,
+        enum: ['Baby', 'Dog', 'House'],
+      },
+    type: {
+        type: String,
+        enum: ['baby', 'dog', 'house', ''],
+        default: '',
     },
     status: {
         type: String,
