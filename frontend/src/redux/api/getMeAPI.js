@@ -3,6 +3,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logout, setUser } from './userSlice';
 import { getToken, removeToken, removeUserData, setUserData } from '../../utils/Utils';
+import { notificationAPI } from './notificationAPI';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -30,10 +31,11 @@ export const getMeAPI = createApi({
       transformResponse(result) {
         return result.user;
       },
-      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setUser(data));
+          await dispatch(notificationAPI.endpoints.getNotifications.initiate(null));
         } catch (error) {
           if (error.error.originalStatus == 401) {
             removeToken();
@@ -76,6 +78,7 @@ export const getMeAPI = createApi({
           await queryFulfilled;
           removeToken();
           removeUserData();
+          dispatch(setUser({}));
           dispatch(logout());
         } catch (error) {
           console.log(error);

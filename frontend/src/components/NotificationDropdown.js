@@ -18,7 +18,7 @@ import { useAppSelector } from '../redux/store';
 
 const NotificationDropdown = () => {
   const user = useAppSelector((state) => state.userState.user);
-  const { data: notifications, isLoading, refetch } = useGetNotificationsQuery();
+  const notificationData = useAppSelector((state) => state.notificationState.notifications);
   const [readNotifiction] = useReadNotifictionMutation();
   const navigate = useNavigate();
   const handleNotificate = (id, type) => {
@@ -28,20 +28,18 @@ const NotificationDropdown = () => {
       navigate(user.role == 'client' ? '/client/messages' : 'service-provider/messages');
     }
     readNotifiction({ notificationId: id });
-    refetch();
   };
 
   const renderNotificationItems = () => {
     return (
       <PerfectScrollbar
         component="li"
-        className="media-list scrollable-container"
+        className="media-list scrollable-container p-3"
         options={{
           wheelPropagation: false
         }}>
-        {notifications &&
-          notifications.length &&
-          notifications.map((item, index) => {
+        {notificationData && notificationData.length > 0 ? (
+          notificationData.map((item, index) => {
             return (
               <a key={index} className="d-flex" onClick={() => handleNotificate(item._id, item.type)}>
                 <div className={classnames('list-item d-flex')}>
@@ -63,7 +61,10 @@ const NotificationDropdown = () => {
                 </div>
               </a>
             );
-          })}
+          })
+        ) : (
+          <div className="no-data-message text-center">There is no data</div>
+        )}
       </PerfectScrollbar>
     );
   };
@@ -71,13 +72,13 @@ const NotificationDropdown = () => {
 
   return (
     <UncontrolledDropdown tag="li" className="dropdown-notification nav-item me-25 d-flex align-items-center">
-      {!isLoading && notifications && (
+      {notificationData && (
         <>
           <DropdownToggle tag="a" className="nav-link" href="/" onClick={(e) => e.preventDefault()}>
             <Bell size={21} />
-            {notifications && notifications.length > 0 && (
+            {notificationData && notificationData.length > 0 && (
               <Badge pill color="danger" className="badge-up">
-                {notifications.length}
+                {notificationData.length}
               </Badge>
             )}
           </DropdownToggle>
@@ -86,7 +87,7 @@ const NotificationDropdown = () => {
               <DropdownItem className="d-flex" tag="div" header>
                 <h4 className="notification-title mb-0 me-auto">Notifications</h4>
                 <Badge tag="div" color="light-primary" pill>
-                  {notifications.length} New
+                  {notificationData.length} New
                 </Badge>
               </DropdownItem>
             </li>

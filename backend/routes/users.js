@@ -6,6 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const { getDistanceBetween } = require('../utils/utils');
 const sgMail = require('@sendgrid/mail');
+const { ObjectId } = require('mongodb');
 sgMail.setApiKey(process.env.SENDGRID_APIKEY);
 
 const storage = multer.diskStorage({
@@ -120,6 +121,131 @@ router.put('/update/:id', verifyToken(['admin', 'client', 'serviceProvider']), a
         new: true,
     }).select('-__v');
     return res.send({ updatedUser: updatedUser, message: 'User successfully updated' });
+});
+
+router.get('/serviceProvider', verifyToken(['admin', 'client']), async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    const statusFilter = (req.query.status !== '' && req.query.status !== 'undefined')
+        ? { status: req.query.status }
+        : {};
+    const searchQuery = typeof req.query.q !== 'undefined' ? req.query.q : '';
+    const user = await User.findById(req.user._id).select('-password -__v');
+    const rateFilter = req.query.price && req.query.price !== 'undefined'
+        ? {
+            rate: {
+                $gte: parseInt(req.query.price.split(',')[0]),
+                $lte: parseInt(req.query.price.split(',')[1])
+            }
+        }
+        : {};
+
+    const providerFilter = req.query.selectedTypes ? { providerType: { $in: req.query.selectedTypes.split(',') } } : {}
+
+    const favouriteFilter = req.query.favourite === 'true' ? { favourite: { $in: [new ObjectId(req.user._id)] } } : {};
+
+    const latitude = user.latitude;
+    const longitude = user.longitude;
+
+    let minDistance;
+    let maxDistance;
+    if (req.query.distance) {
+        const distanceRange = req.query.distance?.split(',');
+        minDistance = distanceRange[0];
+        maxDistance = distanceRange[1];
+    }
+
+    try {
+        const allServiceProviders = await User.aggregate([
+            { $match: { role: 'serviceProvider' } },
+            {
+                $lookup: {
+                    from: 'reviews',
+                    localField: '_id',
+                    foreignField: 'provider',
+                    as: 'userReviews'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'orders',
+                    localField: '_id',
+                    foreignField: 'provider',
+                    as: 'order'
+                }
+            },
+            {
+                $match: {
+                    $and: [
+                        {
+                            $or: [
+                                { firstName: { $regex: searchQuery, $options: 'i' } },
+                                { lastName: { $regex: searchQuery, $options: 'i' } },
+                                { email: { $regex: searchQuery, $options: 'i' } },
+                            ],
+                        },
+                        statusFilter,
+                        rateFilter,
+                        providerFilter,
+                        favouriteFilter
+                    ]
+                }
+            },
+            {
+                $unwind: {
+                    path: '$userReviews',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    data: { $first: '$$ROOT' },
+                    userReviews: { $push: '$userReviews' },
+                    averageMarks: { $avg: '$userReviews.marks' }
+                }
+            },
+            {
+                $replaceRoot: {
+                    newRoot: { $mergeObjects: ['$data', { userReviews: '$userReviews', averageMarks: '$averageMarks' }]
+                    }
+                }
+            }
+        ]).skip(skip).limit(limit);
+
+        let serviceProvidersWithDistance = allServiceProviders
+            .filter(serviceProvider => serviceProvider.address) 
+            .map(serviceProvider => {
+                const distance = getDistanceBetween(latitude, longitude, serviceProvider.latitude, serviceProvider.longitude).toFixed(2);
+                return { distance, serviceProvider };
+            });
+
+        if (minDistance && maxDistance) {
+            serviceProvidersWithDistance = serviceProvidersWithDistance.filter(obj => obj.distance >= parseFloat(minDistance) && obj.distance <= parseFloat(maxDistance));
+        }
+        const totalCount = serviceProvidersWithDistance.length;
+
+        return res.send({
+            totalCount,
+            serviceProviders: serviceProvidersWithDistance,
+        })
+        
+    } catch (error) {
+        return res.status(500).send(error.message);
+    }
+});
+
+router.put('/favourite/:id', verifyToken(['admin', 'client']), async (req, res) => {
+    const user = await User.findById(req.params.id);
+    const isFavourite = user.favourite.includes(req.user._id);
+    if (!isFavourite) {
+        user.favourite.push(req.user._id);
+    } else if (isFavourite) {
+        user.favourite = user.favourite.filter(id => id.toString() !== req.user._id.toString());
+    }
+    const updatedUser = await user.save();
+    return res.send({ updatedUser: updatedUser, message: 'Favourite successfully updated' });
 });
 
 module.exports = router;

@@ -2,6 +2,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getToken, removeToken, removeUserData } from '../../utils/Utils';
 import { navigate } from 'raviger';
+import { setNotification } from './notificationSlice';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -32,10 +33,10 @@ export const notificationAPI = createApi({
       transformResponse(result) {
         return result;
       },
-      onQueryStarted: async (arg, { queryFulfilled }) => {
+      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
-          const result = await queryFulfilled;
-          return result;
+          const { data } = await queryFulfilled;
+          dispatch(setNotification(data));
         } catch (error) {
           if (error.error.originalStatus === 401) {
             removeToken();
@@ -55,7 +56,15 @@ export const notificationAPI = createApi({
         };
       },
       invalidatesTags: [{ type: 'Notifications', id: 'LIST' }],
-      transformResponse: (result) => result
+      transformResponse: (result) => result,
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          await dispatch(notificationAPI.endpoints.getNotifications.initiate());
+        } catch (error) {
+          console.log(error);
+        }
+      }
     })
   })
 });

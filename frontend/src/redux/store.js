@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { authAPI } from './api/authAPI';
 import { getMeAPI } from './api/getMeAPI';
 import userReducer from './api/userSlice';
+import notificationReducer from './api/notificationSlice';
 import contactReducer from './api/contactSlice';
 import { userAPI } from './api/userAPI';
 import { serviceAPI } from './api/serviceAPI';
@@ -29,7 +30,8 @@ export const store = configureStore({
     [notificationAPI.reducerPath]: notificationAPI.reducer,
     [entityAPI.reducerPath]: entityAPI.reducer,
     userState: userReducer,
-    contactState: contactReducer
+    contactState: contactReducer,
+    notificationState: notificationReducer
   },
   devTools: process.env.NODE_ENV === 'development',
   middleware: (getDefaultMiddleware) =>

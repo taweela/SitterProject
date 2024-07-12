@@ -18,7 +18,6 @@ import {
   Label,
   Modal,
   ModalBody,
-  ModalFooter,
   ModalHeader,
   Pagination,
   PaginationItem,
@@ -69,7 +68,7 @@ const ClientServiceProvider = () => {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [createOrder, { isLoading: orderLoading, isError, error, isSuccess }] = useCreateOrderMutation();
   const [createContact] = useCreateContactMutation();
-  const { data: entities } = useGetEntitiesQuery();
+  const { data: entities, refetch: entityRefetch } = useGetEntitiesQuery();
   const [manageFavouriteUser] = useManageFavouriteUserMutation();
   const [modalVisibility, setModalVisibility] = useState(false);
   const [calendarApi, setCalendarApi] = useState(null);
@@ -79,6 +78,7 @@ const ClientServiceProvider = () => {
   const [providerData, setProviderData] = useState();
   const [selectedProviderType, setSelectedProviderType] = useState('');
   const [deleteOrder] = useDeleteOrderMutation();
+  const [selectedProvider, setSelectedProvider] = useState({});
 
   const handleAddEventSidebar = () => setAddSidebarOpen(!addSidebarOpen);
 
@@ -99,7 +99,8 @@ const ClientServiceProvider = () => {
 
   useEffect(() => {
     refetch();
-  }, []);
+    entityRefetch();
+  }, [refetch, entityRefetch]);
   const calendarsColor = {
     baby: 'primary',
     house: 'warning',
@@ -149,26 +150,48 @@ const ClientServiceProvider = () => {
   };
 
   const handleOrder = async (providerId, serviceProvider) => {
-    refetch();
-    let eventList = [];
-    serviceProvider.order.forEach((order) => {
-      eventList.push({
-        allDay: false,
-        end: calendarFormateDate(order.endDate),
-        extendedProps: { calendar: order.type },
-        _id: order._id,
-        start: calendarFormateDate(order.startDate),
-        title: order.title,
-        provider: order.provider,
-        client: order.client,
-        description: order.description,
-        entity: order.entity
+    try {
+      // Refetch necessary data
+      await refetch();
+
+      // Set the selected provider details
+      setSelectedProvider(serviceProvider);
+
+      // Initialize an empty list of events
+      let eventList = [];
+
+      // Find orders related to the current user and iterate through them
+      const userOrders = serviceProvider.order.filter((o) => o.client === user._id);
+      userOrders.forEach((order) => {
+        eventList.push({
+          allDay: false,
+          end: calendarFormateDate(order.endDate),
+          extendedProps: { calendar: order.type },
+          _id: order._id,
+          start: calendarFormateDate(order.startDate),
+          title: order.title,
+          provider: order.provider,
+          client: order.client,
+          description: order.description,
+          entity: order.entity
+        });
       });
-    });
-    setEvents(eventList);
-    setProviderData(providerId);
-    setSelectedProviderType(serviceProvider.providerType);
-    setModalVisibility(!modalVisibility);
+
+      // Update state with the new list of events
+      setEvents(eventList);
+
+      // Update other relevant states
+      setProviderData(providerId);
+      setSelectedProviderType(serviceProvider.providerType);
+
+      // Toggle modal visibility
+      setModalVisibility(true);
+
+      // Refetch events if applicable
+      refetchEvents();
+    } catch (error) {
+      console.error('Failed to handle order:', error);
+    }
   };
 
   // ** Render pages
@@ -450,39 +473,6 @@ const ClientServiceProvider = () => {
                             <span>Order</span>
                           </Button>
                         </div>
-                        <Modal className="modal-dialog-centered modal-lg" isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
-                          <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Order Manage</ModalHeader>
-                          <ModalBody>
-                            <Row>
-                              <Col>
-                                <div className="mt-0">
-                                  <span style={{ color: 'red', fontWeight: '600' }}>Working Schedule: </span>
-                                  {item.serviceProvider.fromDate ? (
-                                    <>
-                                      {getDateFormat(item.serviceProvider.fromDate)} ~ {getDateFormat(item.serviceProvider.toDate)}
-                                    </>
-                                  ) : (
-                                    'No Schedule'
-                                  )}
-                                </div>
-                              </Col>
-                            </Row>
-                            <Row>
-                              <Col className="position-relative">
-                                <Calendar
-                                  events={events}
-                                  blankEvent={blankEvent}
-                                  calendarApi={calendarApi}
-                                  selectedEvent={selectedEvent}
-                                  setSelectedEvent={setSelectedEvent}
-                                  calendarsColor={calendarsColor}
-                                  setCalendarApi={setCalendarApi}
-                                  handleAddEventSidebar={handleAddEventSidebar}
-                                />
-                              </Col>
-                            </Row>
-                          </ModalBody>
-                        </Modal>
                       </Card>
                     ))}
                     <Pagination className="d-flex justify-content-center service-provider-pagination mt-2">
@@ -523,6 +513,39 @@ const ClientServiceProvider = () => {
           selectedProviderType={selectedProviderType}
           deleteOrder={deleteOrder}
         />
+        <Modal className="modal-dialog-centered modal-lg" isOpen={modalVisibility} toggle={() => setModalVisibility(!modalVisibility)}>
+          <ModalHeader toggle={() => setModalVisibility(!modalVisibility)}>Order Manage</ModalHeader>
+          <ModalBody>
+            <Row>
+              <Col>
+                <div className="mt-0">
+                  <span style={{ color: 'red', fontWeight: '600' }}>Working Schedule: </span>
+                  {selectedProvider.fromDate ? (
+                    <>
+                      {getDateFormat(selectedProvider.fromDate)} ~ {getDateFormat(selectedProvider.toDate)}
+                    </>
+                  ) : (
+                    'No Schedule'
+                  )}
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="position-relative">
+                <Calendar
+                  events={events}
+                  blankEvent={blankEvent}
+                  calendarApi={calendarApi}
+                  selectedEvent={selectedEvent}
+                  setSelectedEvent={setSelectedEvent}
+                  calendarsColor={calendarsColor}
+                  setCalendarApi={setCalendarApi}
+                  handleAddEventSidebar={handleAddEventSidebar}
+                />
+              </Col>
+            </Row>
+          </ModalBody>
+        </Modal>
       </Container>
     </div>
   );

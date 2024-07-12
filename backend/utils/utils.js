@@ -19,6 +19,17 @@ function getDistanceBetween(lat1, lon1, lat2, lon2) {
     return d;
 }
 
+const getBackendHourDifference = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+  
+    const diffInMilliseconds = Math.abs(endDate - startDate);
+    const hoursDifference = diffInMilliseconds / (1000 * 60 * 60);
+  
+    return hoursDifference;
+};
+
 module.exports = {
     getDistanceBetween,
+    getBackendHourDifference
 }

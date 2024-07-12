@@ -2,6 +2,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getToken, removeToken, removeUserData } from '../../utils/Utils';
 import { navigate } from 'raviger';
+import { notificationAPI } from './notificationAPI';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -106,7 +107,14 @@ export const orderAPI = createApi({
         };
       },
       invalidatesTags: [{ type: 'Orders', id: 'LIST' }],
-      transformResponse: (result) => result.order
+      transformResponse: (result) => result.order,
+      async onQueryStarted(_args, { dispatch }) {
+        try {
+          await dispatch(notificationAPI.endpoints.getNotifications.initiate(null));
+        } catch (error) {
+          console.log(error);
+        }
+      }
     }),
     updateOrder: builder.mutation({
       query({ id, order }) {
@@ -130,7 +138,14 @@ export const orderAPI = createApi({
         };
       },
       invalidatesTags: [{ type: 'Orders', id: 'LIST' }],
-      transformResponse: (result) => result
+      transformResponse: (result) => result,
+      async onQueryStarted(_args, { dispatch }) {
+        try {
+          await dispatch(notificationAPI.endpoints.getNotifications.initiate(null));
+        } catch (error) {
+          console.log(error);
+        }
+      }
     }),
     deleteOrder: builder.mutation({
       query(id) {

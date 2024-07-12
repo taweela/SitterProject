@@ -19,7 +19,7 @@ const ServiceProviderDashboard = () => {
                 <CardBody className="p-4">
                   <div className="main-title">
                     Offering reliable, flexible childcare in all the ways you need it, Smart Sitting has been at the forefront of professional childcare
-                    services in New York for over a decade.
+                    services in Israel for over a decade.
                   </div>
                 </CardBody>
               </Card>

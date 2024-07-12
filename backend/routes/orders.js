@@ -1,7 +1,11 @@
 const Notification = require('../models/Notification');
 const Order = require('../models/Order');
-const Service = require('../models/Service');
+const Payment = require('../models/Payment');
+const Review = require('../models/Review');
+const User = require('../models/User');
+const { getBackendHourDifference } = require('../utils/utils');
 const verifyToken = require('../utils/verifyToken');
+const moment = require('moment');
 
 const router = require('express').Router();
 
@@ -61,39 +65,60 @@ router.get('/getOrderNumber/:orderNumber', verifyToken(['client', 'serviceProvid
             }
         }
     ])
+    const reviewForOrder = await Review.findOne({ orderNumber: parseFloat(req.params.orderNumber), client: req.user._id });
+    const reviewed = reviewForOrder ? true : false;
     if (!order[0]) {
         return res.status(400).send('No order found');
+    }
+    if (req.user.role == 'client') {
+        return res.send({ ...order[0], reviewed })
     }
     return res.send(order[0]);
 });
 
 router.post('/create', verifyToken(['client']), async (req, res) => {
-    const { provider, service } = req.body;
-    console.log(req.body)
-    const serviceData = await Service.findById(service);
-    console.log(serviceData.fromDate, serviceData.fromTime, serviceData.toDate, serviceData.toTime)
-    const orderExists = await Order.findOne({ service: service });
-    if (orderExists) { return res.status(400).send({ message: 'Order already exists' }); }
+    const user = await User.findById({_id: req.body.provider});
+    const userFromDate = moment(user.fromDate); // Convert MongoDB Date field to Moment.js object
+    const userToDate = moment(user.toDate);
+    const requestBodyStart = moment(req.body.start, 'YYYY-MM-DD HH:mm');
+    const requestBodyEnd = moment(req.body.end, 'YYYY-MM-DD HH:mm');
 
-    const order = new Order({
-        client: req.user._id,
-        provider: provider,
-        service: service,
-        status: 'pending',
-    });
-    const notification = new Notification({
-        sender: req.user._id,
-        receiver: provider,
-        content: "New Order requested!",
-        read: false,
-        type: 'order'
-    });
-    try {
-        const savedOrder = await order.save()
-        await notification.save()
-        return res.send({ order: savedOrder, message: 'Order successfully requested' });
-    } catch (err) {
-        return res.status(400).send(err);
+    if (userFromDate.isSameOrBefore(requestBodyStart) && !userToDate.isSameOrBefore(requestBodyEnd)) {
+        const orderExists = await Order.findOne({
+            $or: [
+                { startDate: { $lte: req.body.start }, endDate: { $gte: req.body.start } },
+                { startDate: { $lte: req.body.end }, endDate: { $gte: req.body.end } }
+            ]
+        });
+        if (orderExists) { return res.status(400).send({ message: 'Order already exists, Please select other date' }); }
+    
+        const order = new Order({
+            client: req.user._id,
+            provider: req.body.provider,
+            type: req.body.type,
+            entity: req.body.entity,
+            startDate: req.body.start,
+            endDate: req.body.end,
+            description: req.body.description,
+            title: req.body.title,
+            status: 'pending',
+        });
+        const notification = new Notification({
+            sender: req.user._id,
+            receiver: req.body.provider,
+            content: "New Order requested!",
+            read: false,
+            type: 'order'
+        });
+        try {
+            const savedOrder = await order.save()
+            await notification.save()
+            return res.send({ order: savedOrder, message: 'Order successfully requested' });
+        } catch (err) {
+            return res.status(400).send(err);
+        }
+    } else {
+        return res.status(400).send({ message: 'Please request in Provider schedule!' });
     }
 });
 
@@ -107,10 +132,22 @@ router.put('/manageStatus/:id', verifyToken(['client', 'serviceProvider']), asyn
         read: false,
         type: 'order'
     });
-    await Order.findOneAndUpdate({ _id: req.params.id }, updateValues, {
+    const order = await Order.findOneAndUpdate({ _id: req.params.id }, updateValues, {
         new: true,
     });
-    await notification.save()
+    await notification.save();
+
+    if (req.body.status == 'completed') {
+        const orderData = await order.populate('provider');
+        const payment = new Payment({
+            client: orderData.client,
+            type: 'hourly',
+            amount: orderData.provider.rate * getBackendHourDifference(orderData.endDate, orderData.startDate),
+            provider: orderData.provider._id,
+            order: orderData._id
+        });
+        await payment.save();
+    }
     return res.send({ message: 'Order Status successfully updated' });
 });
 

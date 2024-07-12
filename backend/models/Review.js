@@ -16,7 +16,12 @@ const reviewSchema = new mongoose.Schema({
     marks: {
         type: Number,
         required: true
-    }
+    },
+    orderNumber: {
+        type: Number,
+        unique: true,
+        required: true,
+    },
 }, {
     timestamps: {
         createdAt: 'createdAt',

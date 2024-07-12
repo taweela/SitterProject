@@ -10,21 +10,22 @@ router.get('/:provider', verifyToken(['client', 'serviceProvider', 'admin']), as
     }).populate({
         path: 'provider'
     }).select("-__v");
-    return res.send({ reviews: reviews });
+    return res.status(200).send({ reviews: reviews });
 });
 
 router.post('/create', verifyToken(['client', 'serviceProvider']), async (req, res) => {
-    const { description, client, provider, marks } = req.body;
+    const { description, client, provider, marks, orderNumber } = req.body;
     const review = new Review({
         client: client,
         description: description,
         provider: provider,
-        marks: marks
+        marks: marks,
+        orderNumber: orderNumber
     });
     try {
         const savedReview = await review.save()
 
-        return res.send({ review: savedReview, message: 'Review Posted successfully' });
+        return res.status(200).send({ review: savedReview, message: 'Review Posted successfully' });
     } catch (err) {
         return res.status(400).send(err);
     }
