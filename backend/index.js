@@ -28,9 +28,7 @@ mongoose.connect(process.env.MONGO_URL)
 // Import routes
 const authRoute = require('./routes/auth');
 const userRoute = require('./routes/users');
-const serviceRoute = require('./routes/services');
 const orderRoute = require('./routes/orders');
-const cardRoute = require('./routes/cards');
 const contactRoute = require('./routes/contacts');
 const Message = require('./models/Message');
 const PaymentRoute = require('./routes/payments');
@@ -65,9 +63,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
-app.use('/api/services', serviceRoute);
 app.use('/api/orders', orderRoute);
-app.use('/api/cards', cardRoute);
 app.use('/api/contacts', contactRoute);
 app.use('/api/payments', PaymentRoute);
 app.use('/api/dashboards', DashboardRoute);

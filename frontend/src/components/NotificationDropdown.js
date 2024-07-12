@@ -22,7 +22,6 @@ const NotificationDropdown = () => {
   const [readNotifiction] = useReadNotifictionMutation();
   const navigate = useNavigate();
   const handleNotificate = (id, type) => {
-    // console.log(type);
     if (type == 'order') {
       navigate(user.role == 'client' ? '/client/orders' : '/service-provider/orders');
     } else if (type == 'message') {
@@ -41,6 +40,7 @@ const NotificationDropdown = () => {
           wheelPropagation: false
         }}>
         {notifications &&
+          notifications.length &&
           notifications.map((item, index) => {
             return (
               <a key={index} className="d-flex" onClick={() => handleNotificate(item._id, item.type)}>
@@ -71,7 +71,7 @@ const NotificationDropdown = () => {
 
   return (
     <UncontrolledDropdown tag="li" className="dropdown-notification nav-item me-25 d-flex align-items-center">
-      {!isLoading && (
+      {!isLoading && notifications && (
         <>
           <DropdownToggle tag="a" className="nav-link" href="/" onClick={(e) => e.preventDefault()}>
             <Bell size={21} />

@@ -4,7 +4,7 @@ import userImg from '../../assets/images/user.png';
 import { useParams } from 'react-router-dom';
 import { useGetUserQuery } from '../../redux/api/userAPI';
 import SpinnerComponent from '../../components/SpinnerComponent';
-import { getDateFormat, standardFormatDate } from '../../utils/Utils';
+import { getDateFormat } from '../../utils/Utils';
 import { useDeleteReviewMutation, useGetReviewsQuery } from '../../redux/api/reviewAPI';
 import { useEffect } from 'react';
 import { Star, Trash2 } from 'react-feather';
@@ -13,12 +13,13 @@ import toast from 'react-hot-toast';
 
 const Profile = () => {
   const { id } = useParams();
-  const { data: user, isLoading } = useGetUserQuery(id);
+  const { data: user, isLoading, refetch: refetchUser } = useGetUserQuery(id);
   const { data: reviews, refetch: refetchReviews } = useGetReviewsQuery(id);
   const curUser = useAppSelector((state) => state.userState.user);
   const [deleteReview, { isLoading: reviewLoading, isError, error, isSuccess }] = useDeleteReviewMutation();
 
   useEffect(() => {
+    refetchUser();
     refetchReviews();
   }, []);
 
@@ -71,7 +72,7 @@ const Profile = () => {
                   <Col md="4" sm="12">
                     <div>
                       <div className="my-3">
-                        <img src={userImg} alt="Profile" className="profile-img" />
+                        <img src={user.avatar ? user.avatar : userImg} alt="Profile" className="profile-img" />
                       </div>
                       <div className="mt-2">
                         <h5 className="mb-0">First Name:</h5>
@@ -160,7 +161,7 @@ const Profile = () => {
                   <Col md="4" sm="12">
                     <div>
                       <div className="my-3">
-                        <img src={userImg} alt="Profile" className="profile-img" />
+                        <img src={user.avatar ? user.avatar : userImg} alt="Profile" className="profile-img" />
                       </div>
                     </div>
                   </Col>

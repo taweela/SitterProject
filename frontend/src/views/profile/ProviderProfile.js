@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { Edit2 } from 'react-feather';
 import classnames from 'classnames';
 import Flatpickr from 'react-flatpickr';
-import moment from 'moment';
+import 'flatpickr/dist/themes/material_blue.css';
 import { useGetReviewsQuery } from '../../redux/api/reviewAPI';
 
 const ProviderProfile = () => {

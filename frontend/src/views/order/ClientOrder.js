@@ -75,7 +75,7 @@ const ClientOrder = () => {
   const handleStatusChange = (data) => {
     setCurrentStatus(data || { value: '', label: 'Status...' });
   };
-  const { data: orders } = useGetOrdersQuery(queryParams);
+  const { data: orders, refetch } = useGetOrdersQuery(queryParams);
 
   const [deleteOrder] = useDeleteOrderMutation();
   const handleDeleteOrder = (id) => {
@@ -101,6 +101,10 @@ const ClientOrder = () => {
       });
     }
   }, [isLoading]);
+
+  useEffect(() => {
+    refetch();
+  }, []);
   const columns = () => [
     {
       name: 'Order Number',

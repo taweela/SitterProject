@@ -8,7 +8,6 @@ import contactReducer from './api/contactSlice';
 import { userAPI } from './api/userAPI';
 import { serviceAPI } from './api/serviceAPI';
 import { orderAPI } from './api/orderAPI';
-import { cardAPI } from './api/cardAPI';
 import { contactAPI } from './api/contactAPI';
 import { paymentAPI } from './api/paymentAPI';
 import { dashboardAPI } from './api/dashboardAPI';
@@ -23,7 +22,6 @@ export const store = configureStore({
     [userAPI.reducerPath]: userAPI.reducer,
     [serviceAPI.reducerPath]: serviceAPI.reducer,
     [orderAPI.reducerPath]: orderAPI.reducer,
-    [cardAPI.reducerPath]: cardAPI.reducer,
     [contactAPI.reducerPath]: contactAPI.reducer,
     [paymentAPI.reducerPath]: paymentAPI.reducer,
     [dashboardAPI.reducerPath]: dashboardAPI.reducer,
@@ -41,7 +39,6 @@ export const store = configureStore({
       userAPI.middleware,
       serviceAPI.middleware,
       orderAPI.middleware,
-      cardAPI.middleware,
       contactAPI.middleware,
       paymentAPI.middleware,
       dashboardAPI.middleware,

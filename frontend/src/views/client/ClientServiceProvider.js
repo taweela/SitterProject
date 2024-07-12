@@ -35,7 +35,6 @@ import { calendarFormateDate, checkFavourite, getDateFormat, getFilterData, remo
 import { useAppSelector } from '../../redux/store';
 import Nouislider from 'nouislider-react';
 import wNumb from 'wnumb';
-import { useForm } from 'react-hook-form';
 import Calendar from './Calendar';
 import { useGetProvidersQuery, useManageFavouriteUserMutation } from '../../redux/api/userAPI';
 import AddEditEventSidebar from './AddEditEventSidebar';
@@ -48,12 +47,6 @@ const ClientServiceProvider = () => {
   const [distance, setDistance] = useState(getFilterData('distance') ? JSON.parse(getFilterData('distance')) : [0, 1000]);
   const [price, setPrice] = useState(getFilterData('price') ? JSON.parse(getFilterData('price')) : [0, 100]);
   const [favourite, setFavourite] = useState(getFilterData('favourite') ? JSON.parse(getFilterData('favourite')) : false);
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors }
-  } = useForm();
   const [page, setPage] = useState(1);
   const serviceTypeInitial = [
     {
@@ -84,6 +77,7 @@ const ClientServiceProvider = () => {
   const [addSidebarOpen, setAddSidebarOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState({});
   const [providerData, setProviderData] = useState();
+  const [selectedProviderType, setSelectedProviderType] = useState('');
   const [deleteOrder] = useDeleteOrderMutation();
 
   const handleAddEventSidebar = () => setAddSidebarOpen(!addSidebarOpen);
@@ -103,6 +97,9 @@ const ClientServiceProvider = () => {
     setSearchItem(q);
   };
 
+  useEffect(() => {
+    refetch();
+  }, []);
   const calendarsColor = {
     baby: 'primary',
     house: 'warning',
@@ -170,7 +167,7 @@ const ClientServiceProvider = () => {
     });
     setEvents(eventList);
     setProviderData(providerId);
-
+    setSelectedProviderType(serviceProvider.providerType);
     setModalVisibility(!modalVisibility);
   };
 
@@ -260,10 +257,6 @@ const ClientServiceProvider = () => {
 
   const handleClose = () => {
     setModalVisibility(!modalVisibility);
-  };
-
-  const onSubmit = (data) => {
-    console.log(data);
   };
 
   const refetchEvents = () => {
@@ -408,14 +401,16 @@ const ClientServiceProvider = () => {
                     {services.serviceProviders.map((item, index) => (
                       <Card className="provider-service-card" key={index}>
                         <div className="item-img text-center mx-auto">
-                          {/* <Link to={`/client/service-providers/view/${item.serviceProvider?._id}`}>
-                            <img className="img-fluid card-img-top" src={userImg} alt={item.serviceProvider?.firstName} />
-                          </Link> */}
-                          <img className="img-fluid card-img-top" src={userImg} alt={item.serviceProvider?.firstName} />
+                          <Link to={`/client/profile-review/${item.serviceProvider?._id}`}>
+                            <img
+                              className="img-fluid card-img-top"
+                              src={item.serviceProvider?.avatar ? item.serviceProvider?.avatar : userImg}
+                              alt={item.serviceProvider?.firstName}
+                            />
+                          </Link>
                         </div>
                         <CardBody>
                           <h6 className="item-name">
-                            {/* <Link className="text-body" to={`/client/service-providers/view/${item.serviceProvider?._id}`}> */}
                             <span className="provider-style">
                               {item.serviceProvider?.firstName} {item.serviceProvider?.lastName}
                             </span>
@@ -525,6 +520,7 @@ const ClientServiceProvider = () => {
           setEvents={setEvents}
           createOrder={createOrder}
           providerData={providerData}
+          selectedProviderType={selectedProviderType}
           deleteOrder={deleteOrder}
         />
       </Container>

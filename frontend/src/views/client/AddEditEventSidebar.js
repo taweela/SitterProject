@@ -12,45 +12,37 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useForm, Controller } from 'react-hook-form';
 
 // ** Reactstrap Imports
-import { Button, Modal, ModalHeader, ModalBody, Label, Form } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody, Label, Form, Badge } from 'reactstrap';
 
 import { isObjEmpty, selectThemeColors } from '../../utils/Utils';
 
 const AddEditEventSidebar = (props) => {
   // ** Props
-  const {
-    open,
-    calendarApi,
-    refetchEvents,
-    selectedEvent,
-    setSelectedEvent,
-    calendarsColor,
-    handleAddEventSidebar,
-    entities,
-    events,
-    setEvents,
-    createOrder,
-    providerData,
-    deleteOrder
-  } = props;
+  const { open, calendarApi, selectedEvent, handleAddEventSidebar, entities, events, setEvents, createOrder, providerData, selectedProviderType, deleteOrder } =
+    props;
   const {
     control,
     register,
     setError,
     setValue,
-    getValues,
     handleSubmit,
     formState: { errors }
   } = useForm();
-
+  const [validDate, setValidDate] = useState('');
   const [endPicker, setEndPicker] = useState();
   const [startPicker, setStartPicker] = useState();
   const [calendarLabel, setCalendarLabel] = useState([{ value: '', label: '', color: 'primary' }]);
   // ** Select Options
   const options = entities
-    ? entities.map((entity) => {
-        return { value: entity._id, label: entity.name, color: 'primary', entype: entity.entype };
-      })
+    ? entities
+        .map((entity) => {
+          if (`${entity.entype}sitter` === selectedProviderType) {
+            return { value: entity._id, label: entity.name, color: 'primary', entype: entity.entype };
+          } else {
+            return null; // Return null for entities that don't match the condition
+          }
+        })
+        .filter(Boolean) // Filter out null values from the array
     : [];
 
   // ** Custom select components
@@ -139,22 +131,20 @@ const AddEditEventSidebar = (props) => {
     toast.error('Order Removed');
   };
 
-  const validateStartDateBeforeEndDate = () => {
-    const endDate = new Date(endPicker);
-    const startDate = new Date(startPicker);
-
-    return startDate < endDate ? true : 'End Date must be after Start Date';
-  };
-
   const onSubmit = (data) => {
     if (data.title.length) {
       if (isObjEmpty(errors)) {
         if (isObjEmpty(selectedEvent) || (!isObjEmpty(selectedEvent) && !selectedEvent.title.length)) {
-          handleAddEvent(data);
+          if (new Date(data.start) >= new Date(data.end)) {
+            setValidDate('End Date cannot be eqaul or small than Start Date');
+          } else {
+            setValidDate('');
+            handleAddEvent(data);
+          }
         } else {
           // handleUpdateEvent();
         }
-        handleAddEventSidebar();
+        // handleAddEventSidebar();
       }
     } else {
       setError('title', {
@@ -207,6 +197,9 @@ const AddEditEventSidebar = (props) => {
       <PerfectScrollbar options={{ wheelPropagation: false }}>
         <ModalBody className="flex-grow-1 pb-sm-0 pb-3">
           <Form onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-1 row">
+              <Badge color="danger">{validDate}</Badge>
+            </div>
             <div className="mb-1">
               <Label className="form-label" for="title">
                 Title <span className="text-danger">*</span>
