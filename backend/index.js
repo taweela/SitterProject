@@ -37,6 +37,7 @@ const ReviewRoute = require('./routes/reviews');
 const NotificationRoute = require('./routes/notifications');
 const Notification = require('./models/Notification');
 const entityRoute = require('./routes/entity');
+const reportRoute = require('./routes/reports');
 
 // increase parse limit
 app.use(bodyParser.json({ limit: '50mb', extended: true }));
@@ -70,6 +71,7 @@ app.use('/api/dashboards', DashboardRoute);
 app.use('/api/reviews', ReviewRoute);
 app.use('/api/notifications', NotificationRoute);
 app.use('/api/entity', entityRoute);
+app.use('/api/reports', reportRoute);
 
 const server = http.createServer(app);
 // Set up Socket.io with proper CORS handling

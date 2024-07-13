@@ -30,9 +30,28 @@ router.get('/', verifyToken(['client', 'serviceProvider']), async (req, res) => 
     });
 });
 
-router.get('/getOrderNumber/:orderNumber', verifyToken(['client', 'serviceProvider']), async (req, res) => {
+router.get('/allOrders', verifyToken(['admin']), async (req, res) => {
+
+    const statusFilter = req.query.status !== '' && typeof req.query.status !== 'undefined' ? { status: req.query.status } : { status: { $ne: 'deleted' } };
+    const filterParams = {
+        ...statusFilter,
+    };
+    const totalCount = await Order.countDocuments({});
+    const orders = await Order.find(filterParams).populate({
+        path: 'client'
+    }).populate({
+        path: 'provider'
+    }).select("-__v");
+    return res.send({
+        totalCount,
+        orders,
+        filteredCount: orders.length,
+    });
+});
+
+router.get('/getOrderNumber/:orderNumber', verifyToken(['client', 'serviceProvider', 'admin']), async (req, res) => {
     const order = await Order.aggregate([
-        { $match: { orderNumber: parseFloat(req.params.orderNumber)} },
+        { $match: { orderNumber: parseFloat(req.params.orderNumber) } },
         {
             $lookup: {
                 from: "users",
@@ -77,7 +96,7 @@ router.get('/getOrderNumber/:orderNumber', verifyToken(['client', 'serviceProvid
 });
 
 router.post('/create', verifyToken(['client']), async (req, res) => {
-    const user = await User.findById({_id: req.body.provider});
+    const user = await User.findById({ _id: req.body.provider });
     const userFromDate = moment(user.fromDate); // Convert MongoDB Date field to Moment.js object
     const userToDate = moment(user.toDate);
     const requestBodyStart = moment(req.body.start, 'YYYY-MM-DD HH:mm');
@@ -89,9 +108,20 @@ router.post('/create', verifyToken(['client']), async (req, res) => {
                 { startDate: { $lte: req.body.start }, endDate: { $gte: req.body.start } },
                 { startDate: { $lte: req.body.end }, endDate: { $gte: req.body.end } }
             ]
+        }).populate({
+            path: 'client'
         });
-        if (orderExists) { return res.status(400).send({ message: 'Order already exists, Please select other date' }); }
-    
+        if (orderExists) {
+            return res.status(400).send({
+                message: 'Order already exists, Please select other date',
+                existingOrder: {
+                    startDate: orderExists.startDate,
+                    endDate: orderExists.endDate,
+                    client: `${orderExists.client.firstName} ${orderExists.client.lastName}`
+                }
+            });
+        }
+
         const order = new Order({
             client: req.user._id,
             provider: req.body.provider,

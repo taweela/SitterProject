@@ -3,7 +3,7 @@ const verifyToken = require("../utils/verifyToken");
 const router = require('express').Router();
 const { ObjectId } = require('mongodb');
 
-router.get('/', verifyToken(['client', 'serviceProvider']), async (req, res) => {
+router.get('/', verifyToken(['client', 'serviceProvider', 'admin']), async (req, res) => {
     
     const notifications = await Notification.find({ receiver: req.user._id, read: false }).populate({
         path: 'sender'

@@ -62,8 +62,30 @@ export const authAPI = createApi({
           console.log(error);
         }
       }
+    }),
+    forgotPassword: builder.mutation({
+      query(payload) {
+        return {
+          url: '/forgot-password',
+          method: 'POST',
+          credentials: 'include',
+          body: payload
+        };
+      },
+      transformResponse: (result) => result
+    }),
+    resetPassword: builder.mutation({
+      query({ token, payload }) {
+        return {
+          url: `/reset-password/${token}`,
+          method: 'POST',
+          credentials: 'include',
+          body: payload
+        };
+      },
+      transformResponse: (result) => result
     })
   })
 });
 
-export const { useLoginUserMutation, useAdminLoginUserMutation, useRegisterUserMutation } = authAPI;
+export const { useLoginUserMutation, useAdminLoginUserMutation, useRegisterUserMutation, useForgotPasswordMutation, useResetPasswordMutation } = authAPI;

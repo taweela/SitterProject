@@ -5,10 +5,10 @@ import { navigate } from 'raviger';
 
 const BASE_URL = process.env.REACT_APP_SERVER_ENDPOINT;
 
-export const reviewAPI = createApi({
-  reducerPath: 'reviewAPI',
+export const reportAPI = createApi({
+  reducerPath: 'reportAPI',
   baseQuery: fetchBaseQuery({
-    baseUrl: `${BASE_URL}/api/reviews`,
+    baseUrl: `${BASE_URL}/api/reports`,
     prepareHeaders: (headers) => {
       const accessToken = getToken();
       if (accessToken) {
@@ -17,20 +17,20 @@ export const reviewAPI = createApi({
       return headers;
     }
   }),
-  tagTypes: ['Reviews'],
+  tagTypes: ['Reports'],
   endpoints: (builder) => ({
-    getReviews: builder.query({
-      query(id) {
+    getReports: builder.query({
+      query() {
         return {
-          url: `/${id}`,
+          url: `/`,
           credentials: 'include'
         };
       },
       providesTags: (result, error, id) => {
-        return [{ type: 'Reviews', id }];
+        return [{ type: 'Reports', id }];
       },
       transformResponse(result) {
-        return result.reviews;
+        return result.reports;
       },
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
@@ -45,7 +45,7 @@ export const reviewAPI = createApi({
         }
       }
     }),
-    createReview: builder.mutation({
+    createReport: builder.mutation({
       query(payload) {
         return {
           url: '/create',
@@ -54,20 +54,24 @@ export const reviewAPI = createApi({
           body: payload
         };
       },
-      invalidatesTags: [{ type: 'Reviews', id: 'LIST' }],
-      transformResponse: (result) => result.review
+      invalidatesTags: [{ type: 'Reports', id: 'LIST' }],
+      transformResponse: (result) => result.report
     }),
-    deleteReview: builder.mutation({
+    getReport: builder.query({
       query(id) {
         return {
-          url: `/delete/${id}`,
-          method: 'DELETE',
+          url: `/getReport/${id}`,
           credentials: 'include'
         };
       },
-      invalidatesTags: [{ type: 'Reviews', id: 'LIST' }]
+      providesTags: (result, error, id) => {
+        return [{ type: 'Reports', id }];
+      },
+      transformResponse(result) {
+        return result.report;
+      }
     })
   })
 });
 
-export const { useCreateReviewMutation, useGetReviewsQuery, useDeleteReviewMutation } = reviewAPI;
+export const { useCreateReportMutation, useGetReportsQuery, useGetReportQuery } = reportAPI;

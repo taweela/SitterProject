@@ -25,6 +25,12 @@ import ClientOrder from './views/order/ClientOrder';
 import ClientOrderDetail from './views/order/ClientOrderDetail';
 import ProviderOrderDetail from './views/order/ProviderOrderDetail';
 import AdminDashboard from './views/dashboard/AdminDashboard';
+import ForgotPassword from './views/auth/ForgotPassword';
+import ResetPassword from './views/auth/ResetPassword';
+import Reports from './views/admin/Reports';
+import ReportView from './views/admin/ReportView';
+import AdminOrder from './views/order/AdminOrder';
+import AdminOrderDetail from './views/order/AdminOrderDetail';
 
 const App = () => {
   return (
@@ -38,6 +44,10 @@ const App = () => {
             <Route path="admin/clients" element={<Client />} />
             <Route path="admin/service-providers" element={<ServiceProvider />} />
             <Route path="admin/profile-review/:id" element={<Profile />} />
+            <Route path="admin/reports" element={<Reports />} />
+            <Route path="admin/reports/report-review/:id" element={<ReportView />} />
+            <Route path="admin/orders" element={<AdminOrder />} />
+            <Route path="admin/orders/detail/:orderNumber" element={<AdminOrderDetail />} />
           </Route>
           <Route element={<RequiredUser allowedRoles={['client']} />}>
             <Route path="client/dashboard" element={<ClientDashboard />} />
@@ -61,7 +71,8 @@ const App = () => {
         <Route path="admin/login" element={<AdminLogin />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
-        <Route path="client-register" element={<ClientRegister />} />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password/:token" element={<ResetPassword />} />
         <Route path="client-register" element={<ClientRegister />} />
         <Route path="service-provider-register" element={<ServiceProviderRegister />} />
 

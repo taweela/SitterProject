@@ -140,6 +140,20 @@ const ServiceProviderRegister = () => {
                 {errors.email && <span className="small text-danger">Email is required.</span>}
               </FormGroup>
               <FormGroup>
+                <Label>Age</Label>
+                <input
+                  className={`form-control ${classnames({ 'is-invalid': errors.age })}`}
+                  type="number"
+                  id="age"
+                  {...register('age', {
+                    required: 'Age is required',
+                    min: { value: 18, message: 'You must be at least 18 years old' },
+                    max: { value: 100, message: 'You must be less than 100 years old' }
+                  })}
+                />
+                {errors.age && <span className="small text-danger">{errors.age.message}</span>}
+              </FormGroup>
+              <FormGroup>
                 <Label>Password</Label>
                 <input
                   className={`form-control ${classnames({ 'is-invalid': errors.password })}`}

@@ -104,6 +104,16 @@ const Header = () => {
                       Service Providers
                     </NavLink>
                   </NavItem>
+                  <NavItem className="nav-item-responsive">
+                    <NavLink className={currentRoute.includes('admin/reports') ? 'active' : ''} onClick={() => navigate('/admin/reports')}>
+                      Reports
+                    </NavLink>
+                  </NavItem>
+                  <NavItem className="nav-item-responsive">
+                    <NavLink className={currentRoute.includes('admin/orders') ? 'active' : ''} onClick={() => navigate('/admin/orders')}>
+                      Orders
+                    </NavLink>
+                  </NavItem>
                   <UncontrolledDropdown nav inNavbar>
                     <DropdownToggle nav caret>
                       <img src={user.avatar ? user.avatar : userImg} alt="user" className="user-img" />

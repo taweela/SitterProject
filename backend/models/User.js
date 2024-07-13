@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
     },
     rate: {
         type: Number,
-        default: 0,
+        default: 100,
     },
     description: {
         type: String,
@@ -60,6 +60,10 @@ const userSchema = new mongoose.Schema({
     },
     experience: {
         type: String,
+    },
+    age: {
+        type: Number,
+        required: false,
     },
     fromDate: {
         type: Date,

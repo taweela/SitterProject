@@ -57,6 +57,43 @@ export const orderAPI = createApi({
         }
       }
     }),
+    getAdminOrders: builder.query({
+      query: (args) => {
+        return {
+          url: '/allOrders',
+          params: { ...args },
+          credentials: 'include'
+        };
+      },
+      providesTags(result) {
+        if (result) {
+          return [
+            ...result.map(({ id }) => ({
+              type: 'Orders',
+              id
+            })),
+            { type: 'Orders', id: 'LIST' }
+          ];
+        } else {
+          return [{ type: 'Orders', id: 'LIST' }];
+        }
+      },
+      transformResponse(results) {
+        return results.orders;
+      },
+      onQueryStarted: async (arg, { queryFulfilled }) => {
+        try {
+          const result = await queryFulfilled;
+          return result;
+        } catch (error) {
+          if (error.error.originalStatus === 401) {
+            removeToken();
+            removeUserData();
+            navigate('/login');
+          }
+        }
+      }
+    }),
     getOrder: builder.query({
       query(id) {
         return {
@@ -167,5 +204,6 @@ export const {
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useManageStatusOrderMutation,
-  useGetOrderNumberQuery
+  useGetOrderNumberQuery,
+  useGetAdminOrdersQuery
 } = orderAPI;

@@ -108,7 +108,12 @@ const Login = () => {
                 />
                 {errors.password && <span className="text-danger">Password is required.</span>}
               </FormGroup>
-              <div className="mt-4">
+              <div className="my-1 d-flex justify-content-end">
+                <Link to="/forgot-password" className="primary-link">
+                  <span>Forgot Password?</span>
+                </Link>
+              </div>
+              <div className="mt-2">
                 <Button color="danger" className="btn-block w-100" type="submit">
                   LOGIN
                 </Button>
